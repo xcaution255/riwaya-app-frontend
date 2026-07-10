@@ -53,6 +53,17 @@ kotlin {
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.2")
             implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0")
+
+            // Official Jetpack ViewModel Multiplatform (v2.8.0+)
+            implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+            implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+
+            // 3. Multiplatform DataStore Preferences
+            implementation("androidx.datastore:datastore-preferences:1.2.1")
+
+            // 4. Coil 3.x Image Loading Extensions
+            implementation("io.coil-kt.coil3:coil-compose:3.5.0")
+            implementation("io.coil-kt.coil3:coil-network-ktor3:3.5.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
