@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,6 +20,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,6 +28,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import com.excaution.riwayaapp.domain.model.SampleData
+import com.excaution.riwayaapp.domain.model.StoryGenre
 import com.excaution.riwayaapp.presentation.components.GradientButton
 import com.excaution.riwayaapp.presentation.components.PressScaleButton
 import com.excaution.riwayaapp.presentation.theme.AccentLight
@@ -89,9 +93,6 @@ sealed interface ProfileMenuItem {
         val initialValue: Boolean = false,
     ) : ProfileMenuItem
 }
-
-// ── Screen ────────────────────────────────────────────────────────────────────
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -106,12 +107,38 @@ fun ProfileScreen(
     var showSheet    by remember { mutableStateOf(false) }
     var currentProfile by remember { mutableStateOf(profile) }
 
+    // 1. Setup the Scroll Behavior for the Top Bar (EnterAlways = hides on downscroll, shows on upscroll)
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
     // Key perf trick: give LazyColumn its own stable state
     val listState = rememberLazyListState()
 
     Scaffold(
-        containerColor = InkTheme.colors.bgDeep,
-    ) { padding ->
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection), // Crucial: Connects scroll to TopBar
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text       = "Profile",
+                        fontSize   = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = (-0.8).sp,
+                        style = LocalTextStyle.current.copy(
+                            brush = Brush.linearGradient(GradientAccent),
+                        ),
+                    )
+                },
+                actions = {},
+                windowInsets = WindowInsets(0, 0, 0, 0), //added
+                scrollBehavior = scrollBehavior, // Passes scroll behavior down
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = InkTheme.colors.bgDeep,
+                    scrolledContainerColor = InkTheme.colors.bgDeep
+                )
+            )
+        }
+    )  { padding ->
         LazyColumn(
             state = listState,
             contentPadding = PaddingValues(
@@ -122,16 +149,13 @@ fun ProfileScreen(
                 .fillMaxSize()
                 .background(InkTheme.colors.bgDeep),
         ) {
-            // Hero header (non-sticky, scrolls away)
-            item(key = "hero") {
-                ProfileHero(
-                    profile = currentProfile,
-                    onEditClick = {
-                        showSheet = true
-                        scope.launch { sheetState.show() }
-                    },
-                )
-            }
+            stickyHeader {  ProfileHero(
+                profile = currentProfile,
+                onEditClick = {
+                    showSheet = true
+                    scope.launch { sheetState.show() }
+                },
+            ) }
 
             // Stats row
             item(key = "stats") {
@@ -211,7 +235,7 @@ fun ProfileScreen(
     }
 }
 
-// ── Hero ──────────────────────────────────────────────────────────────────────
+// ── Hero profile──────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun ProfileHero(
@@ -601,8 +625,6 @@ private fun EditProfileSheet(
     onSave: (UserProfile) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var firstName by remember { mutableStateOf(profile.firstName) }
-    var lastName  by remember { mutableStateOf(profile.lastName) }
     var username  by remember { mutableStateOf(profile.username) }
     var bio       by remember { mutableStateOf(profile.bio) }
     var website   by remember { mutableStateOf(profile.website) }
@@ -656,7 +678,7 @@ private fun EditProfileSheet(
                         .clip(CircleShape)
                         .background(Brush.linearGradient(GradientAccent)),
                 ) {
-                    Text(firstName.firstOrNull()?.uppercase() ?: "?", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                    Text(username.firstOrNull()?.uppercase() ?: "?", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                 }
                 Box(
                     contentAlignment = Alignment.Center,
@@ -682,20 +704,6 @@ private fun EditProfileSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.padding(horizontal = 16.dp),
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                SheetField(
-                    label = "First name",
-                    value = firstName,
-                    onValueChange = { firstName = it },
-                    modifier = Modifier.weight(1f),
-                )
-                SheetField(
-                    label = "Last name",
-                    value = lastName,
-                    onValueChange = { lastName = it },
-                    modifier = Modifier.weight(1f),
-                )
-            }
             SheetField(label = "Username", value = username, onValueChange = { username = it })
             SheetField(label = "Bio", value = bio, onValueChange = { bio = it }, minLines = 2, maxLines = 4)
             SheetField(label = "Website", value = website, onValueChange = { website = it })
@@ -709,8 +717,6 @@ private fun EditProfileSheet(
             onClick  = {
                 onSave(
                     profile.copy(
-                        firstName = firstName,
-                        lastName  = lastName,
                         username  = username,
                         bio       = bio,
                         website   = website,

@@ -122,7 +122,5 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
                 onPasswordSet = {navController.navigate(Route.Auth.Login)}
             )
         }
-
-        
     }
 }

@@ -188,7 +188,7 @@ fun SurfaceIconButton(
     tint: Color = InkTheme.colors.textSecondary,
     badge: Int? = null,
 ) {
-    Box(modifier = modifier) {
+    Box(modifier = modifier.padding(end = 12.dp)) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -227,77 +227,6 @@ fun SurfaceIconButton(
     }
 }
 
-// ── Section Header ───────────────────────────────────────────────────────────
-
-@Composable
-fun SectionHeader(
-    title: String,
-    actionLabel: String = "See all",
-    onAction: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = InkTheme.colors.textPrimary,
-            letterSpacing = (-0.3).sp,
-        )
-        if (onAction != null) {
-            Text(
-                text = "$actionLabel →",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = InkTheme.colors.accentPrimary,
-                modifier = Modifier.clickable(onClick = onAction),
-            )
-        }
-    }
-}
-
-// ── Book Cover Illustration ──────────────────────────────────────────────────
-
-@Composable
-fun BookCoverBox(
-    gradient: List<Color>,
-    emoji: String,
-    modifier: Modifier = Modifier,
-    height: Dp = 130.dp,
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height)
-            .background(Brush.linearGradient(gradient)),
-    ) {
-        // Spine
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(10.dp)
-                .align(Alignment.CenterStart)
-                .background(gradient.first().copy(alpha = 0.6f)),
-        )
-        // Circle
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(gradient.first().copy(alpha = 0.8f))
-                .border(1.5.dp, gradient.last().copy(alpha = 0.6f), CircleShape),
-        ) {
-            Text(emoji, fontSize = 22.sp)
-        }
-    }
-}
-
 // ── Stat Chip ────────────────────────────────────────────────────────────────
 
 @Composable
@@ -307,26 +236,6 @@ fun StatChip(icon: String, value: String) {
         horizontalArrangement = Arrangement.spacedBy(3.dp),
     ) {
         Text(icon, fontSize = 11.sp)
-        Text(value, fontSize = 11.sp, color = InkTheme.colors.textFaint)
-    }
-}
-
-// ── Discount Badge ───────────────────────────────────────────────────────────
-
-@Composable
-fun DiscountBadge(percent: Int) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(InkTheme.colors.successGreen.copy(alpha = 0.12f))
-            .border(0.5.dp, InkTheme.colors.successGreen.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
-            .padding(horizontal = 7.dp, vertical = 3.dp),
-    ) {
-        Text(
-            text = "-$percent%",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = InkTheme.colors.successGreen,
-        )
+        Text(value, fontSize = 11.sp, color = TextFaint)
     }
 }

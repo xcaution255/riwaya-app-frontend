@@ -1,4 +1,4 @@
-package com.excaution.riwayaapp.presentation.home
+package com.excaution.riwayaapp.presentation.saved
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -7,19 +7,29 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,14 +43,19 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material3.Divider
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -52,8 +67,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -61,10 +79,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.excaution.riwayaapp.domain.model.SampleData
 import com.excaution.riwayaapp.domain.model.Story
 import com.excaution.riwayaapp.domain.model.StoryGenre
 import com.excaution.riwayaapp.presentation.components.GenreTag
+import com.excaution.riwayaapp.presentation.components.InitialsAvatar
+import com.excaution.riwayaapp.presentation.components.PressScaleButton
 import com.excaution.riwayaapp.presentation.components.StatChip
 import com.excaution.riwayaapp.presentation.components.SurfaceIconButton
 import com.excaution.riwayaapp.presentation.theme.GradientAccent
@@ -74,12 +95,9 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun HomeScreen(onNotificationClick: () -> Unit) {
+fun SavedScreen() {
     // 1. Setup the Scroll Behavior for the Top Bar (EnterAlways = hides on downscroll, shows on upscroll)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
-    val listState = rememberLazyListState()
-
 
     //for chips
     var selectedGenre by remember { mutableStateOf(StoryGenre.ALL) }
@@ -94,7 +112,7 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
             TopAppBar(
                 title = {
                     Text(
-                        text       = "RiwayaApp",
+                        text       = "Saved",
                         fontSize   = 24.sp,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = (-0.8).sp,
@@ -103,14 +121,7 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
                         ),
                     )
                 },
-                actions = {
-                    SurfaceIconButton(
-                        icon = Icons.Rounded.Notifications,
-                        contentDescription = "Notifications",
-                        onClick = {onNotificationClick()},
-                        badge = 5,
-                    )
-                },
+                actions = {},
                 windowInsets = WindowInsets(0, 0, 0, 0), //added
                 scrollBehavior = scrollBehavior, // Passes scroll behavior down
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -124,7 +135,6 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 0.dp),
-            state = listState,
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding(), // Handles top bar dynamically
                 bottom = innerPadding.calculateBottomPadding()
@@ -140,8 +150,8 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
                 key   = { _, s -> s.id },
             ) { index, story ->
                 AnimatedStoryListItem(
-                    story = story,
-                    index = index,
+                    story   = story,
+                    index   = index,
                     onClick = {},
                 )
                 if (index < filteredStories.size - 2) {
@@ -180,9 +190,9 @@ fun CategoryChips( //private
     ) {
         items(genres) { genre ->
             CategoryChip(
-                label = "${genreEmojis[genre]} ${genre.label}",
+                label    = "${genreEmojis[genre]} ${genre.label}",
                 isActive = genre == selected,
-                onClick = { onSelect(genre) },
+                onClick  = { onSelect(genre) },
             )
         }
     }
@@ -220,6 +230,120 @@ fun CategoryChip( //private
         )
     }
 }
+
+// ── Featured Story Card ───────────────────────────────────────────────────────
+
+@Composable
+private fun FeaturedStoryCard(story: Story, onClick: () -> Unit) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+
+    AnimatedVisibility(
+        visible = visible,
+        enter   = fadeIn(tween(400)) + slideInVertically(tween(400)) { it / 3 },
+    ) {
+        PressScaleButton(
+            onClick = onClick,
+            modifier = Modifier.padding(horizontal = 20.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(210.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Brush.linearGradient(story.coverGradient)),
+            ) {
+                // Decorative glow circles
+                Box(
+                    modifier = Modifier
+                        .size(160.dp)
+                        .offset(x = (-40).dp, y = (-40).dp)
+                        .clip(CircleShape)
+                        .background(InkTheme.colors.accentPrimary.copy(alpha = 0.15f))
+                )
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .offset(x = 220.dp, y = 80.dp)
+                        .clip(CircleShape)
+                        .background(InkTheme.colors.accentLight.copy(alpha = 0.1f))
+                )
+
+                // Bottom gradient scrim
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color.Transparent, Color(0xDD000000))
+                            )
+                        )
+                )
+
+                // Editor's pick badge
+                Box(
+                    modifier = Modifier
+                        .padding(14.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(InkTheme.colors.accentPrimary.copy(alpha = 0.9f))
+                        .padding(horizontal = 12.dp, vertical = 5.dp),
+                ) {
+                    Text(
+                        text = "✦ EDITOR'S PICK",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        letterSpacing = 0.8.sp,
+                    )
+                }
+
+                // Content at bottom
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(16.dp),
+                ) {
+                    GenreTag(
+                        label = story.genre.label,
+                        color = story.genre.color,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = story.title,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White,
+                        letterSpacing = (-0.4).sp,
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        InitialsAvatar(initial = story.authorInitial, size = 22.dp, fontSize = 9)
+                        Text(
+                            text = "by ${story.author}",
+                            fontSize = 12.sp,
+                            color = Color.White.copy(alpha = 0.7f),
+                        )
+                        Text("·", fontSize = 12.sp, color = InkTheme.colors.textMuted)
+                        Icon(
+                            imageVector = Icons.Rounded.Visibility,
+                            contentDescription = null,
+                            tint = InkTheme.colors.textMuted,
+                            modifier = Modifier.size(13.dp),
+                        )
+                        Text(story.reads, fontSize = 11.sp, color = InkTheme.colors.textMuted)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ── Story List Item ───────────────────────────────────────────────────────────
 
 @Composable
 fun AnimatedStoryListItem( //private

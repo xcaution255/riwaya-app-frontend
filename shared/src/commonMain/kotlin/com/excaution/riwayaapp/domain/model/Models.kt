@@ -99,6 +99,37 @@ object SampleData {
             readTimeMin = 33, likes = "54k", comments = "9.1k", reads = "120k",
             coverGradient = GradientHorror, coverEmoji = "💀",
         ),
+        Story(
+            id = 6, title = "The Last Starweaver", author = "Elara Voss",
+            authorInitial = "E", genre = StoryGenre.FANTASY,
+            readTimeMin = 87, likes = "24.1k", comments = "1.8k", reads = "142k",
+            isFeatured = true,
+            coverGradient = GradientFantasy, coverEmoji = "✦",
+        ),
+        Story(
+            id = 7, title = "Garden of Quiet Storms", author = "Mira Chen",
+            authorInitial = "M", genre = StoryGenre.ROMANCE,
+            readTimeMin = 24, likes = "24.1k", comments = "1.8k", reads = "89k",
+            coverGradient = GradientRomance, coverEmoji = "🌿",
+        ),
+        Story(
+            id = 8, title = "The Gilded Cipher", author = "Ade Okonkwo",
+            authorInitial = "A", genre = StoryGenre.MYSTERY,
+            readTimeMin = 41, likes = "89.4k", comments = "6.2k", reads = "201k",
+            coverGradient = GradientMystery, coverEmoji = "🔍",
+        ),
+        Story(
+            id = 9, title = "Echoes Beyond Orion", author = "Sol Martinez",
+            authorInitial = "S", genre = StoryGenre.SCIFI,
+            readTimeMin = 62, likes = "201k", comments = "14k", reads = "580k",
+            coverGradient = GradientSciFi, coverEmoji = "🚀",
+        ),
+        Story(
+            id = 10, title = "What Sleeps Below", author = "K. Darkmore",
+            authorInitial = "K", genre = StoryGenre.HORROR,
+            readTimeMin = 33, likes = "54k", comments = "9.1k", reads = "120k",
+            coverGradient = GradientHorror, coverEmoji = "💀",
+        )
     )
 
     val books = listOf(
@@ -128,6 +159,36 @@ object SampleData {
         ),
         Book(
             id = 5, title = "The Amber Dossier", author = "Ade Okonkwo",
+            genre = StoryGenre.MYSTERY, price = 5.99, originalPrice = null,
+            rating = 5.0f, reviewCount = "6,490",
+            coverGradient = GradientMystery, coverEmoji = "🔍",
+        ),
+        Book(
+            id = 6, title = "Echoes of the Void", author = "Elena Vasquez",
+            genre = StoryGenre.FANTASY, price = 8.99, originalPrice = 14.99,
+            rating = 4.4f, reviewCount = "4,821",
+            coverGradient = GradientFantasy, coverEmoji = "✦", isBestseller = true,
+        ),
+        Book(
+            id = 7, title = "The Bloom Between Us", author = "Mira Chen",
+            genre = StoryGenre.ROMANCE, price = 6.99, originalPrice = null,
+            rating = 4.0f, reviewCount = "2,104",
+            coverGradient = GradientRomance, coverEmoji = "🌿",
+        ),
+        Book(
+            id = 8, title = "What Sleeps Beneath", author = "K. Darkmore",
+            genre = StoryGenre.HORROR, price = 9.49, originalPrice = null,
+            rating = 5.0f, reviewCount = "8,312",
+            coverGradient = GradientHorror, coverEmoji = "💀", isWishlisted = true,
+        ),
+        Book(
+            id = 9, title = "Starfall Protocol", author = "Sol Martinez",
+            genre = StoryGenre.SCIFI, price = 7.99, originalPrice = 11.99,
+            rating = 4.0f, reviewCount = "3,678",
+            coverGradient = GradientSciFi, coverEmoji = "🚀",
+        ),
+        Book(
+            id = 10, title = "The Amber Dossier", author = "Ade Okonkwo",
             genre = StoryGenre.MYSTERY, price = 5.99, originalPrice = null,
             rating = 5.0f, reviewCount = "6,490",
             coverGradient = GradientMystery, coverEmoji = "🔍",

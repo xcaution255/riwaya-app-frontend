@@ -169,7 +169,7 @@ private fun TermsCheckbox(checked: Boolean, onCheck: (Boolean) -> Unit) {
         AnimatedCheckbox(checked = checked, onToggle = { onCheck(!checked) })
         Text(
             buildAnnotatedString {
-                withStyle(SpanStyle(color = InkTheme.colors.textMuted, fontSize = 12.sp)) { append("I agree to inkflow's ") }
+                withStyle(SpanStyle(color = InkTheme.colors.textMuted, fontSize = 12.sp)) { append("I agree to RiwayaApp ") }
                 withStyle(SpanStyle(color = InkTheme.colors.accentPrimary, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)) { append("Terms of service") }
                 withStyle(SpanStyle(color = InkTheme.colors.textMuted, fontSize = 12.sp)) { append(" and ") }
                 withStyle(SpanStyle(color = InkTheme.colors.accentPrimary, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)) { append("Privacy policy") }
@@ -182,7 +182,7 @@ private fun TermsCheckbox(checked: Boolean, onCheck: (Boolean) -> Unit) {
 @Composable
 private fun LinkRow(text: String, linkLabel: String, onClick: () -> Unit) {
     Box(
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.CenterEnd,
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
     ) {
         ClickableText(

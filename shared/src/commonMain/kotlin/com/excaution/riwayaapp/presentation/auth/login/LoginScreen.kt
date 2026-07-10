@@ -140,7 +140,10 @@ fun LoginScreen(
                 )
             }
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(410, 230))) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                Box(contentAlignment = Alignment.CenterEnd,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)) {
                     ClickableText(
                         text = buildAnnotatedString {
                             withStyle(SpanStyle(color = InkTheme.colors.textFaint, fontSize = 13.sp)) { append("Don't have an account? ") }

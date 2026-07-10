@@ -58,5 +58,10 @@ sealed interface Route {
 
         @Serializable
         data object Saved : Main
+
+        @Serializable
+        data object Search : Main {
+
+        }
     }
 }
