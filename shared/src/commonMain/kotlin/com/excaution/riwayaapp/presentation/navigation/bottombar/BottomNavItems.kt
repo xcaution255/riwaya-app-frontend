@@ -2,33 +2,31 @@ package com.excaution.riwayaapp.presentation.navigation.bottombar
 
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Book
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.PersonOutline
-import androidx.compose.material.icons.outlined.Save
+import androidx.compose.material.icons.rounded.Book
+import androidx.compose.material.icons.rounded.Bookmark
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Person
 
 object BottomNavItems {
     val items = listOf(
         BottomNavItem(
             "Home",
-            Icons.Outlined.Home
+            Icons.Rounded.Home
         ),
 
         BottomNavItem(
             "BookStore",
-            Icons.Outlined.Book
+            Icons.Rounded.Book
         ),
 
         BottomNavItem(
             "Saved",
-            Icons.Outlined.Save
+            Icons.Rounded.Bookmark
         ),
 
         BottomNavItem(
             "Profile",
-            Icons.Outlined.PersonOutline
+            Icons.Rounded.Person
         )
 
     )

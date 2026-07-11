@@ -113,7 +113,7 @@ val darkScheme = InkColorScheme(
     bgOtp = Color(0xFF16163A),
 )
 val lightScheme = InkColorScheme(
-    bgDeep = Color(0xFFF4F2FF), bgSurface = Color(0xFFFFFFFF),
+    bgDeep = Color(0xFFEDEAFF), bgSurface = Color(0xFFFFFFFF), //bgDepp before Color(0xFFF4F2FF)
     bgCard = Color(0xFFEDEAFF), bgBorder = Color(0xFFD8D3FF),
     accentPrimary = Color(0xFF6C5CE7), accentLight = Color(0xFF8B7CF8),
     textPrimary = Color(0xFF1A1530), textSecondary = Color(0xFF4A4270),

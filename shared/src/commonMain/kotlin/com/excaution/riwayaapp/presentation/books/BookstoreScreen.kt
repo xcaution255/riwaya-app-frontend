@@ -3,7 +3,6 @@ package com.excaution.riwayaapp.presentation.books
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.CircleShape
@@ -20,16 +19,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.excaution.riwayaapp.domain.model.Book
 import com.excaution.riwayaapp.domain.model.SampleData
-import com.excaution.riwayaapp.domain.model.StoryGenre
+import com.excaution.riwayaapp.domain.model.StoryGenreFeed
 import com.excaution.riwayaapp.format
 import com.excaution.riwayaapp.presentation.components.GenreTag
-import com.excaution.riwayaapp.presentation.components.GradientButton
 import com.excaution.riwayaapp.presentation.components.PressScaleButton
 import com.excaution.riwayaapp.presentation.components.StarRating
 import com.excaution.riwayaapp.presentation.theme.GradientAccent
@@ -43,7 +40,7 @@ fun BookStoreScreen() {
     // 1. Setup the Scroll Behavior for the Top Bar (EnterAlways = hides on downscroll, shows on upscroll)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    var selectedGenre by remember { mutableStateOf<StoryGenre?>(null) }
+    var selectedGenre by remember { mutableStateOf<StoryGenreFeed?>(null) }
     //for chips
     val filteredBooks = remember(selectedGenre) {
         if (selectedGenre == null) SampleData.books
@@ -201,18 +198,18 @@ private fun PromoBanner(modifier: Modifier = Modifier) {
 
 @Composable
 private fun FilterChips(
-    selected: StoryGenre?,
-    onSelect: (StoryGenre?) -> Unit,
+    selected: StoryGenreFeed?,
+    onSelect: (StoryGenreFeed?) -> Unit,
 ) {
-    val filters = listOf(null) + StoryGenre.values()
-        .filter { it != StoryGenre.ALL && it != StoryGenre.ADVENTURE }
-    val labels  = mapOf<StoryGenre?, String>(
+    val filters = listOf(null) + StoryGenreFeed.values()
+        .filter { it != StoryGenreFeed.ALL && it != StoryGenreFeed.ADVENTURE }
+    val labels  = mapOf<StoryGenreFeed?, String>(
         null                 to "All Books",
-        StoryGenre.FANTASY   to "Bestsellers",
-        StoryGenre.ROMANCE   to "New Arrivals",
-        StoryGenre.MYSTERY   to "Fantasy",
-        StoryGenre.SCIFI     to "Mystery",
-        StoryGenre.HORROR    to "Romance",
+        StoryGenreFeed.STORIES   to "Stories",
+        StoryGenreFeed.ENTERTAINMENT   to "Entertainment",
+        StoryGenreFeed.ARTICLES   to "Articles",
+        StoryGenreFeed.DOCTOR     to "Doctor",
+        StoryGenreFeed.MOVIES    to "Movies",
     )
     LazyRow(
         contentPadding        = PaddingValues(horizontal = 20.dp),
@@ -221,11 +218,11 @@ private fun FilterChips(
     ) {
         val filterItems = listOf(
             null to "All Books",
-            StoryGenre.FANTASY   to "Bestsellers",
-            StoryGenre.ROMANCE   to "New Arrivals",
-            StoryGenre.MYSTERY   to "Mystery",
-            StoryGenre.SCIFI     to "Sci-Fi",
-            StoryGenre.HORROR    to "Horror",
+            StoryGenreFeed.STORIES   to "Stories",
+            StoryGenreFeed.ENTERTAINMENT   to "Entertainment",
+            StoryGenreFeed.ARTICLES   to "Articles",
+            StoryGenreFeed.DOCTOR     to "Doctor",
+            StoryGenreFeed.MOVIES    to "Movies",
         )
         items(filterItems) { (genre, label) ->
             val isActive = genre == selected

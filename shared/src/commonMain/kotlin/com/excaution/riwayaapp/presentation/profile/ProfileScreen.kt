@@ -27,36 +27,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
-import com.excaution.riwayaapp.domain.model.SampleData
-import com.excaution.riwayaapp.domain.model.StoryGenre
 import com.excaution.riwayaapp.presentation.components.GradientButton
 import com.excaution.riwayaapp.presentation.components.PressScaleButton
-import com.excaution.riwayaapp.presentation.theme.AccentLight
-import com.excaution.riwayaapp.presentation.theme.AccentPrimary
-import com.excaution.riwayaapp.presentation.theme.BgBorder
-import com.excaution.riwayaapp.presentation.theme.BgCard
-import com.excaution.riwayaapp.presentation.theme.BgDeep
-import com.excaution.riwayaapp.presentation.theme.BgSurface
-import com.excaution.riwayaapp.presentation.theme.DangerRed
-import com.excaution.riwayaapp.presentation.theme.GenreSciFi
 import com.excaution.riwayaapp.presentation.theme.GradientAccent
 import com.excaution.riwayaapp.presentation.theme.GradientFeatured
 import com.excaution.riwayaapp.presentation.theme.InkTheme
-import com.excaution.riwayaapp.presentation.theme.LocalThemeIsDark
-import com.excaution.riwayaapp.presentation.theme.StarColor
-import com.excaution.riwayaapp.presentation.theme.SuccessGreen
-import com.excaution.riwayaapp.presentation.theme.TextFaint
-import com.excaution.riwayaapp.presentation.theme.TextMuted
-import com.excaution.riwayaapp.presentation.theme.TextPrimary
-import com.excaution.riwayaapp.presentation.theme.TextSecondary
 import kotlinx.coroutines.launch
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 data class UserProfile(
     val firstName: String  = "Augustino",
-    val lastName: String   = "Mwamba",
+    val lastName: String   = "J",
     val username: String   = "@augustino",
     val email: String      = "augustino@email.com",
     val bio: String        = "Crafting worlds through words. Fantasy & Sci-Fi author. Writing \"The Last Starweaver\" series ✦",
