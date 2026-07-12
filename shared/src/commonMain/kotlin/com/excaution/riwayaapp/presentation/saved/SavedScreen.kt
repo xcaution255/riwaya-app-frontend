@@ -25,6 +25,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -72,7 +73,6 @@ import com.excaution.riwayaapp.presentation.theme.GradientAccent
 import com.excaution.riwayaapp.presentation.theme.InkTheme
 import kotlinx.coroutines.delay
 
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SavedScreen() {
@@ -94,7 +94,6 @@ fun SavedScreen() {
                     Text(
                         text       = "Saved",
                         fontSize   = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
                         letterSpacing = (-0.8).sp,
                         style = LocalTextStyle.current.copy(
                             brush = Brush.linearGradient(GradientAccent),
@@ -155,13 +154,12 @@ fun CategoryChips( //private
 ) {
     val genres = StoryGenreFeed.values()
     val genreEmojis = mapOf(
-        StoryGenreFeed.ALL       to "✦",
-        StoryGenreFeed.STORIES   to "🔮",
-        StoryGenreFeed.ENTERTAINMENT   to "💘",
-        StoryGenreFeed.ARTICLES   to "🔍",
-        StoryGenreFeed.DOCTOR     to "🚀",
-        StoryGenreFeed.MOVIES    to "😱",
-        StoryGenreFeed.ADVENTURE to "🌍",
+        StoryGenreFeed.ALL       to "",
+        StoryGenreFeed.STORIES   to "",
+        StoryGenreFeed.ENTERTAINMENT   to "",
+        StoryGenreFeed.ARTICLES   to "",
+        StoryGenreFeed.DOCTOR     to "",
+        StoryGenreFeed.MOVIES    to ""
     )
     LazyRow(
         contentPadding        = PaddingValues(horizontal = 20.dp),
@@ -187,7 +185,7 @@ fun CategoryChip( //private
     val scale by animateFloatAsState(
         targetValue   = if (isActive) 1f else 0.96f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label         = "chipScale",
+        label = "chipScale",
     )
     Box(
         contentAlignment = Alignment.Center,
@@ -199,7 +197,7 @@ fun CategoryChip( //private
                 else Modifier.background(InkTheme.colors.bgSurface)
                     .border(1.5.dp, InkTheme.colors.bgBorder, RoundedCornerShape(20.dp))
             )
-            .clickable(onClick = onClick)
+            .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null){onClick()}
             .padding(horizontal = 16.dp, vertical = 9.dp),
     ) {
         Text(
@@ -211,120 +209,8 @@ fun CategoryChip( //private
     }
 }
 
-// ── Featured Story Card ───────────────────────────────────────────────────────
-
-@Composable
-private fun FeaturedStoryCard(story: Story, onClick: () -> Unit) {
-    var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { visible = true }
-
-    AnimatedVisibility(
-        visible = visible,
-        enter   = fadeIn(tween(400)) + slideInVertically(tween(400)) { it / 3 },
-    ) {
-        PressScaleButton(
-            onClick = onClick,
-            modifier = Modifier.padding(horizontal = 20.dp),
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(210.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Brush.linearGradient(story.coverGradient)),
-            ) {
-                // Decorative glow circles
-                Box(
-                    modifier = Modifier
-                        .size(160.dp)
-                        .offset(x = (-40).dp, y = (-40).dp)
-                        .clip(CircleShape)
-                        .background(InkTheme.colors.accentPrimary.copy(alpha = 0.15f))
-                )
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .offset(x = 220.dp, y = 80.dp)
-                        .clip(CircleShape)
-                        .background(InkTheme.colors.accentLight.copy(alpha = 0.1f))
-                )
-
-                // Bottom gradient scrim
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp)
-                        .align(Alignment.BottomCenter)
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color.Transparent, Color(0xDD000000))
-                            )
-                        )
-                )
-
-                // Editor's pick badge
-                Box(
-                    modifier = Modifier
-                        .padding(14.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(InkTheme.colors.accentPrimary.copy(alpha = 0.9f))
-                        .padding(horizontal = 12.dp, vertical = 5.dp),
-                ) {
-                    Text(
-                        text = "✦ EDITOR'S PICK",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        letterSpacing = 0.8.sp,
-                    )
-                }
-
-                // Content at bottom
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(16.dp),
-                ) {
-                    GenreTag(
-                        label = story.genre.label,
-                        color = story.genre.color,
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = story.title,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White,
-                        letterSpacing = (-0.4).sp,
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        InitialsAvatar(initial = story.authorInitial, size = 22.dp, fontSize = 9)
-                        Text(
-                            text = "by ${story.author}",
-                            fontSize = 12.sp,
-                            color = Color.White.copy(alpha = 0.7f),
-                        )
-                        Text("·", fontSize = 12.sp, color = InkTheme.colors.textMuted)
-                        Icon(
-                            imageVector = Icons.Rounded.Visibility,
-                            contentDescription = null,
-                            tint = InkTheme.colors.textMuted,
-                            modifier = Modifier.size(13.dp),
-                        )
-                        Text(story.reads, fontSize = 11.sp, color = InkTheme.colors.textMuted)
-                    }
-                }
-            }
-        }
-    }
-}
 
 // ── Story List Item ───────────────────────────────────────────────────────────
-
 @Composable
 fun AnimatedStoryListItem( //private
     story: Story,
@@ -351,7 +237,7 @@ private fun StoryListItem(story: Story, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null){onClick()}
             .padding(horizontal = 20.dp, vertical = 14.dp),
     ) {
         // Cover
@@ -387,12 +273,12 @@ private fun StoryListItem(story: Story, onClick: () -> Unit) {
             GenreTag(label = story.genre.label, color = story.genre.color)
             Spacer(Modifier.height(2.dp))
             Text(
-                text       = story.title,
-                fontSize   = 14.sp,
+                text = story.title,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color      = InkTheme.colors.textPrimary,
-                maxLines   = 1,
-                overflow   = TextOverflow.Ellipsis,
+                color = InkTheme.colors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 letterSpacing = (-0.2).sp,
             )
             Text(

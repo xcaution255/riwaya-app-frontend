@@ -1,14 +1,18 @@
 package com.excaution.riwayaapp.presentation.navigation
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.excaution.riwayaapp.presentation.theme.InkTheme
 
 @Composable
 fun RootNavGraph() {
@@ -41,16 +45,16 @@ fun RootNavGraph() {
         }
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = if (isLoggedIn) Route.MainGraph else Route.AuthGraph,
-//        enterTransition = NavAnimations.crossFadeEnter,
-//        exitTransition = NavAnimations.crossFadeExit,
-    ) {
-        authGraph(navController)
+    Surface(modifier = Modifier.fillMaxSize(),color = InkTheme.colors.bgDeep) {
+        NavHost(
+            navController = navController,
+            startDestination = if (isLoggedIn) Route.MainGraph else Route.AuthGraph
+        ) {
+            authGraph(navController)
 
-        composable<Route.MainGraph> {
-            MainScaffold(onLogout = { Session.logout() })
+            composable<Route.MainGraph> {
+                MainScaffold(onLogout = { Session.logout() })
+            }
         }
     }
 }

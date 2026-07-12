@@ -20,12 +20,13 @@ import com.excaution.riwayaapp.presentation.profile.ProfileScreen
 import com.excaution.riwayaapp.presentation.saved.SavedScreen
 import com.excaution.riwayaapp.presentation.search.SearchScreen
 import com.excaution.riwayaapp.presentation.theme.InkTheme
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MainScaffold(
     onLogout: () -> Unit
 ) {
-    val bottomVM : BottomViewModel = viewModel()
+    val bottomVM : BottomViewModel = koinViewModel()
     val bottomState by bottomVM.uiState.collectAsState()
 
     val navController = rememberNavController()

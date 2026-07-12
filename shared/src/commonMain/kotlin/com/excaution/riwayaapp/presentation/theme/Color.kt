@@ -15,22 +15,22 @@ val AccentLight     = Color(0xFFA78BFA)
 val AccentGlow      = Color(0x267C6AF7)   // 15% alpha
 
 // ── Text ─────────────────────────────────────────────────────────────────────
-val TextPrimary     = Color(0xFFF0EFF8)
-val TextSecondary   = Color(0xFF9B9BB8)
-val TextMuted       = Color(0xFF6A6A88)
-val TextFaint       = Color(0xFF4A4A6A)
+val TextPrimary = Color(0xFFF0EFF8)
+val TextSecondary = Color(0xFF9B9BB8)
+val TextMuted = Color(0xFF6A6A88)
+val TextFaint = Color(0xFF4A4A6A)
 
 // ── Genre Colors ─────────────────────────────────────────────────────────────
-val GenreFantasy    = Color(0xFFA78BFA)
-val GenreRomance    = Color(0xFF4ADE80)
-val GenreMystery    = Color(0xFFEF9F27)
-val GenreSciFi      = Color(0xFF60A5FA)
-val GenreHorror     = Color(0xFFE24B4A)
+val GenreFantasy = Color(0xFFA78BFA)
+val GenreRomance = Color(0xFF4ADE80)
+val GenreMystery = Color(0xFFEF9F27)
+val GenreSciFi = Color(0xFF60A5FA)
+val GenreHorror = Color(0xFFE24B4A)
 
 // ── Utility ──────────────────────────────────────────────────────────────────
-val StarColor       = Color(0xFFF59E0B)
-val SuccessGreen    = Color(0xFF4ADE80)
-val DangerRed       = Color(0xFFE24B4A)
+val StarColor = Color(0xFFF59E0B)
+val SuccessGreen = Color(0xFF4ADE80)
+val DangerRed = Color(0xFFE24B4A)
 
 // ── Gradients (use with Brush.linearGradient) ────────────────────────────────
 val GradientAccent  = listOf(AccentPrimary, AccentLight)

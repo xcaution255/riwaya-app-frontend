@@ -20,6 +20,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -131,8 +132,7 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
                     item = item,
                     modifier = Modifier,
                     onCommentsClick = {  showSheet = true
-                        scope.launch { sheetState.show() }},
-                    onShareClick = {}
+                        scope.launch { sheetState.show() }}
                 )
            }
         }
@@ -172,13 +172,12 @@ fun CategoryChips( //private
 ) {
     val genres = StoryGenreFeed.values()
     val genreEmojis = mapOf(
-        StoryGenreFeed.ALL       to "✦",
-        StoryGenreFeed.STORIES   to "🔮",
-        StoryGenreFeed.ENTERTAINMENT   to "💘",
-        StoryGenreFeed.ARTICLES   to "🔍",
-        StoryGenreFeed.DOCTOR     to "🚀",
-        StoryGenreFeed.MOVIES    to "😱",
-        StoryGenreFeed.ADVENTURE to "🌍",
+        StoryGenreFeed.ALL       to "",
+        StoryGenreFeed.STORIES   to "",
+        StoryGenreFeed.ENTERTAINMENT   to "",
+        StoryGenreFeed.ARTICLES   to "",
+        StoryGenreFeed.DOCTOR     to "",
+        StoryGenreFeed.MOVIES    to ""
     )
     LazyRow(
         contentPadding        = PaddingValues(horizontal = 20.dp),
@@ -216,7 +215,7 @@ fun CategoryChip( //private
                 else Modifier.background(InkTheme.colors.bgSurface)
                     .border(1.5.dp, InkTheme.colors.bgBorder, RoundedCornerShape(20.dp))
             )
-            .clickable(onClick = onClick)
+            .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) {onClick()}
             .padding(horizontal = 16.dp, vertical = 9.dp),
     ) {
         Text(

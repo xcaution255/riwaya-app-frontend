@@ -3,6 +3,7 @@ package com.excaution.riwayaapp.presentation.home
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.CircleShape
@@ -119,14 +120,14 @@ fun CommentsSheet(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope      = rememberCoroutineScope()
-    var show       by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+    var show by remember { mutableStateOf(true) }
 
     if (show) {
         ModalBottomSheet(
             onDismissRequest = { show = false; onDismiss() },
-            sheetState       = sheetState,
-            containerColor   = InkTheme.colors.bgDeep,
+            sheetState = sheetState,
+            containerColor = InkTheme.colors.bgDeep,
             dragHandle = {
                 Box(
                     modifier = Modifier
@@ -139,7 +140,7 @@ fun CommentsSheet(
         ) {
             CommentsContent(
                 totalComments = totalComments,
-                onDismiss     = {
+                onDismiss = {
                     scope.launch { sheetState.hide() }
                     show = false; onDismiss()
                 },
@@ -213,7 +214,7 @@ fun CommentsContent(
                     .clip(RoundedCornerShape(8.dp))
                     .background(InkTheme.colors.bgCard)
                     .border(0.5.dp, InkTheme.colors.bgBorder, RoundedCornerShape(8.dp))
-                    .clickable { }
+                    .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) { }
                     .padding(horizontal = 10.dp, vertical = 6.dp),
             ) {
                 Icon(Icons.Rounded.SwapVert, null, tint = InkTheme.colors.textSecondary, modifier = Modifier.size(13.dp))
@@ -303,7 +304,7 @@ fun CommentsContent(
                     .size(36.dp)
                     .clip(CircleShape)
                     .background(Brush.linearGradient(GradientAccent))
-                    .clickable {
+                    .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) {
                         if (inputText.isNotBlank()) {
                             comments = listOf(
                                 Comment(
@@ -424,7 +425,7 @@ private fun CommentItem(
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             color    = if (repliesExpanded) InkTheme.colors.accentPrimary else InkTheme.colors.textFaint,
-                            modifier = Modifier.clickable {
+                            modifier = Modifier.clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) {
                                 if (comment.replies.isNotEmpty()) repliesExpanded = !repliesExpanded
                                 else onReply(comment.id)
                             },
@@ -514,7 +515,7 @@ private fun ReactionPill(emoji: String, count: Int) {
             .clip(CircleShape)
             .background(bgColor)
             .border(0.5.dp, borderColor, CircleShape)
-            .clickable { picked = !picked }
+            .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) { picked = !picked }
             .padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
         Text(emoji, fontSize = 12.sp)
@@ -543,7 +544,7 @@ private fun LikeButton(count: Int, isLiked: Boolean, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = Modifier.clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) {onClick()},
     ) {
         Text("♥", fontSize = 14.sp, color = color, modifier = Modifier.scale(scale))
         AnimatedContent(
@@ -577,7 +578,7 @@ private fun EmojiButton(emoji: String) {
         fontSize = 22.sp,
         modifier = Modifier
             .scale(scale)
-            .clickable {
+            .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) {
                 pressed = true
                 CoroutineScope(Dispatchers.Main).launch {
                     delay(250)

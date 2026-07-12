@@ -2,6 +2,7 @@ package com.excaution.riwayaapp.presentation.profile
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.excaution.riwayaapp.presentation.components.GradientButton
@@ -32,6 +34,7 @@ import com.excaution.riwayaapp.presentation.components.PressScaleButton
 import com.excaution.riwayaapp.presentation.theme.GradientAccent
 import com.excaution.riwayaapp.presentation.theme.GradientFeatured
 import com.excaution.riwayaapp.presentation.theme.InkTheme
+import com.excaution.riwayaapp.presentation.theme.LocalThemeController
 import kotlinx.coroutines.launch
 
 // ── Data ─────────────────────────────────────────────────────────────────────
@@ -96,30 +99,6 @@ fun ProfileScreen(
     val listState = rememberLazyListState()
 
     Scaffold(
-        modifier = Modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection), // Crucial: Connects scroll to TopBar
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text       = "Profile",
-                        fontSize   = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = (-0.8).sp,
-                        style = LocalTextStyle.current.copy(
-                            brush = Brush.linearGradient(GradientAccent),
-                        ),
-                    )
-                },
-                actions = {},
-                windowInsets = WindowInsets(0, 0, 0, 0), //added
-                scrollBehavior = scrollBehavior, // Passes scroll behavior down
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = InkTheme.colors.bgDeep,
-                    scrolledContainerColor = InkTheme.colors.bgDeep
-                )
-            )
-        }
     )  { padding ->
         LazyColumn(
             state = listState,
@@ -131,13 +110,16 @@ fun ProfileScreen(
                 .fillMaxSize()
                 .background(InkTheme.colors.bgDeep),
         ) {
-            stickyHeader {  ProfileHero(
-                profile = currentProfile,
-                onEditClick = {
-                    showSheet = true
-                    scope.launch { sheetState.show() }
-                },
-            ) }
+            item(key = "header") {
+                ProfileHero(
+                    profile = currentProfile,
+                    onEditClick = {
+                        showSheet = true
+                        scope.launch { sheetState.show() }
+                    },
+                )
+                Spacer(Modifier.height(8.dp))
+            }
 
             // Stats row
             item(key = "stats") {
@@ -152,10 +134,9 @@ fun ProfileScreen(
             item(key = "group-account") {
                 MenuGroup(
                     items = buildAccountItems(
-                        profile            = currentProfile,
-                        onStories          = onNavigateToStories,
-                        onEarnings         = onNavigateToEarnings,
-                        onNotifications    = onNavigateToNotifications,
+                        profile = currentProfile,
+                        onStories = onNavigateToStories,
+                        onEarnings = onNavigateToEarnings
                     )
                 )
                 Spacer(Modifier.height(8.dp))
@@ -187,8 +168,8 @@ fun ProfileScreen(
     if (showSheet) {
         ModalBottomSheet(
             onDismissRequest = { showSheet = false },
-            sheetState       = sheetState,
-            containerColor   = InkTheme.colors.bgSurface,
+            sheetState = sheetState,
+            containerColor = InkTheme.colors.bgSurface,
             dragHandle = {
                 Box(
                     modifier = Modifier
@@ -230,7 +211,7 @@ private fun ProfileHero(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(130.dp)
-                .background(Brush.linearGradient(GradientFeatured)),
+                .background(Brush.linearGradient(InkTheme.colors.coverGradient)),
         ) {
             // Decorative blobs
             Box(
@@ -255,16 +236,16 @@ private fun ProfileHero(
                     .align(Alignment.TopEnd)
                     .padding(12.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color.Black.copy(alpha = 0.5f))
+                    .background(InkTheme.colors.bgDeep.copy(alpha = 0.5f))
                     .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
-                    .clickable { }
+                    .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) { }
                     .padding(horizontal = 10.dp, vertical = 5.dp),
             ) {
                 Icon(
-                    imageVector        = Icons.Rounded.CameraAlt,
+                    imageVector = Icons.Rounded.CameraAlt,
                     contentDescription = "Edit cover",
-                    tint               = InkTheme.colors.textSecondary,
-                    modifier           = Modifier.size(13.dp),
+                    tint = InkTheme.colors.textSecondary,
+                    modifier = Modifier.size(13.dp),
                 )
                 Text("Edit cover", fontSize = 11.sp, color = InkTheme.colors.textSecondary)
             }
@@ -293,10 +274,10 @@ private fun ProfileHero(
                         .border(3.dp, InkTheme.colors.bgDeep, CircleShape),
                 ) {
                     Text(
-                        text       = profile.firstName.first().uppercase(),
-                        fontSize   = 26.sp,
+                        text = profile.firstName.first().uppercase(),
+                        fontSize = 26.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color      = Color.White,
+                        color = Color.White,
                     )
                 }
                 // Online dot
@@ -314,25 +295,25 @@ private fun ProfileHero(
 
             Spacer(Modifier.height(10.dp))
             Text(
-                text          = "${profile.firstName} ${profile.lastName}",
-                fontSize      = 18.sp,
-                fontWeight    = FontWeight.ExtraBold,
-                color         = InkTheme.colors.textPrimary,
+                text = "${profile.firstName} ${profile.lastName}",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = InkTheme.colors.textPrimary,
                 letterSpacing = (-0.4).sp,
             )
             Text(
-                text     = "${profile.username} · ${profile.memberSince}",
+                text = "${profile.username} · ${profile.memberSince}",
                 fontSize = 12.sp,
-                color    = InkTheme.colors.textMuted,
+                color = InkTheme.colors.textMuted,
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text      = profile.bio,
-                fontSize  = 13.sp,
-                color     = InkTheme.colors.textSecondary,
+                text = profile.bio,
+                fontSize = 13.sp,
+                color = InkTheme.colors.textSecondary,
                 textAlign = TextAlign.Center,
                 lineHeight = 19.sp,
-                modifier  = Modifier.padding(horizontal = 32.dp),
+                modifier = Modifier.padding(horizontal = 32.dp),
             )
             Spacer(Modifier.height(12.dp))
             // Edit button
@@ -347,16 +328,16 @@ private fun ProfileHero(
                         .padding(horizontal = 18.dp, vertical = 8.dp),
                 ) {
                     Icon(
-                        imageVector        = Icons.Rounded.Edit,
+                        imageVector = Icons.Rounded.Edit,
                         contentDescription = null,
-                        tint               = InkTheme.colors.accentPrimary,
-                        modifier           = Modifier.size(15.dp),
+                        tint = InkTheme.colors.accentPrimary,
+                        modifier = Modifier.size(15.dp),
                     )
                     Text(
-                        text       = "Edit profile",
-                        fontSize   = 13.sp,
+                        text = "Edit profile",
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color      = InkTheme.colors.accentPrimary,
+                        color = InkTheme.colors.accentPrimary,
                     )
                 }
             }
@@ -393,20 +374,20 @@ private fun ProfileStats(profile: UserProfile) {
                             shape = RoundedCornerShape(0.dp),
                         ) else Modifier
                     )
-                    .clickable { }
+                    .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) { }
                     .padding(vertical = 10.dp),
             ) {
                 Text(
-                    text          = value,
-                    fontSize      = 16.sp,
-                    fontWeight    = FontWeight.ExtraBold,
-                    color         = InkTheme.colors.textPrimary,
+                    text = value,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = InkTheme.colors.textPrimary,
                     letterSpacing = (-0.3).sp,
                 )
                 Text(
-                    text     = label,
+                    text = label,
                     fontSize = 10.sp,
-                    color    = InkTheme.colors.textMuted,
+                    color = InkTheme.colors.textMuted,
                     letterSpacing = 0.4.sp,
                 )
             }
@@ -419,12 +400,12 @@ private fun ProfileStats(profile: UserProfile) {
 @Composable
 private fun SectionLabel(title: String) {
     Text(
-        text          = title.uppercase(),
-        fontSize      = 10.sp,
-        fontWeight    = FontWeight.Bold,
-        color         = InkTheme.colors.textFaint,
+        text = title.uppercase(),
+        fontSize = 10.sp,
+        fontWeight = FontWeight.Bold,
+        color = InkTheme.colors.textFaint,
         letterSpacing = 0.8.sp,
-        modifier      = Modifier.padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
     )
 }
 
@@ -441,7 +422,7 @@ private fun MenuGroup(items: List<ProfileMenuItem>) {
         items.forEachIndexed { index, item ->
             if (index > 0) {
                 HorizontalDivider(
-                    color     = InkTheme.colors.bgBorder.copy(alpha = 0.6f),
+                    color = InkTheme.colors.bgBorder.copy(alpha = 0.6f),
                     thickness = 0.5.dp,
                     modifier  = Modifier.padding(start = 58.dp),
                 )
@@ -461,7 +442,7 @@ private fun NavigableItem(item: ProfileMenuItem.Navigable) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = item.onClick)
+            .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null){item.onClick}
             .padding(horizontal = 14.dp, vertical = 13.dp),
     ) {
         // Icon box
@@ -473,24 +454,24 @@ private fun NavigableItem(item: ProfileMenuItem.Navigable) {
                 .background(item.iconBg),
         ) {
             Icon(
-                imageVector        = item.icon,
+                imageVector = item.icon,
                 contentDescription = null,
-                tint               = item.iconTint,
-                modifier           = Modifier.size(16.dp),
+                tint = item.iconTint,
+                modifier = Modifier.size(16.dp),
             )
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text       = item.title,
-                fontSize   = 14.sp,
+                text = item.title,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color      = InkTheme.colors.textPrimary,
+                color = InkTheme.colors.textPrimary,
             )
             if (item.subtitle != null) {
                 Text(
-                    text     = item.subtitle,
+                    text = item.subtitle,
                     fontSize = 11.sp,
-                    color    = InkTheme.colors.textMuted,
+                    color = InkTheme.colors.textMuted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -521,8 +502,14 @@ private fun NavigableItem(item: ProfileMenuItem.Navigable) {
 }
 
 @Composable
-private fun ToggleItem(item: ProfileMenuItem.Toggle) {
-    var checked by remember { mutableStateOf(item.initialValue) }
+private fun ToggleItem(
+    item: ProfileMenuItem.Toggle
+) {
+    //var checked by remember { mutableStateOf(item.initialValue) }
+    // 1. Grab the global controller reference directly from the environment
+    val themeController = LocalThemeController.current
+    val checked = themeController.value
+
     val thumbPos by animateFloatAsState(
         targetValue   = if (checked) 1f else 0f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
@@ -533,7 +520,9 @@ private fun ToggleItem(item: ProfileMenuItem.Toggle) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { checked = !checked}
+            .clickable(
+                interactionSource =  remember { MutableInteractionSource() },
+                indication = null) {  themeController.value = !checked} //2. Mutate global theme instantly
             .padding(horizontal = 14.dp, vertical = 13.dp),
     ) {
         Box(
@@ -553,7 +542,9 @@ private fun ToggleItem(item: ProfileMenuItem.Toggle) {
                 .height(20.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .background(if (checked) InkTheme.colors.accentPrimary else InkTheme.colors.bgBorder)
-                .clickable { checked = !checked },
+                .clickable(
+                    interactionSource =  remember { MutableInteractionSource() },
+                    indication = null) {themeController.value = !checked} // 3. Mutate global theme instantly here too
         ) {
             Box(
                 modifier = Modifier
@@ -639,7 +630,7 @@ private fun EditProfileSheet(
                     .size(28.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(InkTheme.colors.bgBorder)
-                    .clickable(onClick = onDismiss),
+                    .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null){onDismiss()},
             ) {
                 Icon(Icons.Rounded.Close, contentDescription = "Dismiss", tint = InkTheme.colors.textSecondary, modifier = Modifier.size(14.dp))
             }
@@ -670,7 +661,7 @@ private fun EditProfileSheet(
                         .clip(CircleShape)
                         .background(InkTheme.colors.accentPrimary)
                         .border(2.dp, InkTheme.colors.bgSurface, CircleShape)
-                        .clickable { },
+                        .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) { },
                 ) {
                     Icon(Icons.Rounded.CameraAlt, contentDescription = "Change photo", tint = Color.White, modifier = Modifier.size(11.dp))
                 }
@@ -772,7 +763,6 @@ private fun buildAccountItems(
     profile: UserProfile,
     onStories: () -> Unit,
     onEarnings: () -> Unit,
-    onNotifications: () -> Unit,
 ) = listOf(
     ProfileMenuItem.Navigable(
         title    = "Personal info",
@@ -863,10 +853,19 @@ private fun buildSupportItems() = listOf(
         isExternal = true,
     ),
     ProfileMenuItem.Navigable(
-        title    = "About inkflow",
+        title    = "About RiwayaApp",
         subtitle = "Version 2.4.1",
         icon     = Icons.Rounded.Info,
         iconBg   = InkTheme.colors.genreSciFi.copy(alpha = 0.12f),
         iconTint = InkTheme.colors.genreSciFi,
     ),
 )
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun ProfileHeroPrev() {
+    ProfileHero(
+        profile = UserProfile(),
+        onEditClick = {}
+    )
+}

@@ -58,7 +58,6 @@ fun BookStoreScreen() {
                     Text(
                         text       = "Bookstore",
                         fontSize   = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
                         letterSpacing = (-0.8).sp,
                         style = LocalTextStyle.current.copy(
                             brush = Brush.linearGradient(GradientAccent),
@@ -201,16 +200,6 @@ private fun FilterChips(
     selected: StoryGenreFeed?,
     onSelect: (StoryGenreFeed?) -> Unit,
 ) {
-    val filters = listOf(null) + StoryGenreFeed.values()
-        .filter { it != StoryGenreFeed.ALL && it != StoryGenreFeed.ADVENTURE }
-    val labels  = mapOf<StoryGenreFeed?, String>(
-        null                 to "All Books",
-        StoryGenreFeed.STORIES   to "Stories",
-        StoryGenreFeed.ENTERTAINMENT   to "Entertainment",
-        StoryGenreFeed.ARTICLES   to "Articles",
-        StoryGenreFeed.DOCTOR     to "Doctor",
-        StoryGenreFeed.MOVIES    to "Movies",
-    )
     LazyRow(
         contentPadding        = PaddingValues(horizontal = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
