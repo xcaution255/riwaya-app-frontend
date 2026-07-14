@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -19,6 +22,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.excaution.riwayaapp.presentation.auth.login.LoginEvent
 import com.excaution.riwayaapp.presentation.auth.passwordrecovery.AnimatedCheckbox
 import com.excaution.riwayaapp.presentation.components.AuthBrandHeader
 import com.excaution.riwayaapp.presentation.components.AuthDivider
@@ -33,12 +37,15 @@ import com.excaution.riwayaapp.presentation.theme.AccentPrimary
 import com.excaution.riwayaapp.presentation.theme.InkTheme
 import com.excaution.riwayaapp.presentation.theme.TextFaint
 import com.excaution.riwayaapp.presentation.theme.TextMuted
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
     onRegisterSuccess: () -> Unit,
 ) {
+    val viewModel: RegisterViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsState()
     var username by remember { mutableStateOf("") }
     var email     by remember { mutableStateOf("") }
     var password  by remember { mutableStateOf("") }
@@ -46,20 +53,24 @@ fun RegisterScreen(
     var isLoading by remember { mutableStateOf(false) }
 
     val emailState = when {
-        email.isEmpty()          -> AuthFieldState.IDLE
-        email.contains("@")      -> AuthFieldState.VALID
-        else                     -> AuthFieldState.ERROR
+        email.isEmpty() -> AuthFieldState.IDLE
+        email.contains("@") -> AuthFieldState.VALID
+        else -> AuthFieldState.ERROR
     }
 
     // Staggered entrance
     var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { visible = true }
+    LaunchedEffect(Unit) {
+        visible = true
+        viewModel.events.collect { event ->
+            when (event) {
+                RegisterEvent.NavigateToVerifyEmail(uiState.email) -> {onRegisterSuccess()}
+                else -> {}
+            }
+        }
+    }
 
     AuthScaffold {
-//        // Brand
-//        AnimatedVisibility(visible = visible, enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { -10 }) {
-//            AuthBrandHeader()
-//        }
 
         // Header
         AnimatedVisibility(visible = visible, enter = fadeIn(tween(320, 50)) + slideInVertically(tween(320, 50)) { 20 }) {
@@ -80,8 +91,8 @@ fun RegisterScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     AuthField(
                         label         = "Username",
-                        value         = username,
-                        onValueChange = { username = it },
+                        value         = uiState.username,
+                        onValueChange = { viewModel.onNameChange(it)},
                         placeholder   = "augustino",
                         modifier      = Modifier.weight(1f),
                         imeAction     = ImeAction.Next,
@@ -92,8 +103,8 @@ fun RegisterScreen(
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(350, 110)) + slideInVertically(tween(350, 110)) { 20 }) {
                 AuthField(
                     label         = "Email address",
-                    value         = email,
-                    onValueChange = { email = it },
+                    value         = uiState.email,
+                    onValueChange = { viewModel.onEmailChange(it)},
                     placeholder   = "you@example.com",
                     state         = emailState,
                     keyboardType  = KeyboardType.Email,
@@ -110,8 +121,8 @@ fun RegisterScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     AuthField(
                         label         = "Password",
-                        value         = password,
-                        onValueChange = { password = it },
+                        value         = uiState.password,
+                        onValueChange = { viewModel.onPasswordChange(it)},
                         placeholder   = "Min. 8 characters",
                         isPassword    = true,
                         keyboardType  = KeyboardType.Password,
@@ -136,16 +147,24 @@ fun RegisterScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.padding(horizontal = 24.dp),
         ) {
+            uiState.errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(380, 200))) {
-                AuthPrimaryButton(
-                    text      = "Create account",
-                    onClick   = {
-                        isLoading = true
-                        onRegisterSuccess()
-                    },
-                    icon      = Icons.Rounded.PersonAdd,
-                    isLoading = isLoading,
-                )
+                if (uiState.isLoading)
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                else {
+                    AuthPrimaryButton(
+                        text = "Create account",
+                        onClick = {
+                            viewModel.register()
+                        },
+                        icon = Icons.Rounded.PersonAdd,
+                        isLoading = uiState.isLoading,
+                    )
+                }
             }
 
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(410, 260))) {

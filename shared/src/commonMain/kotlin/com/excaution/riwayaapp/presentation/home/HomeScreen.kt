@@ -176,7 +176,7 @@ fun CategoryChips( //private
         StoryGenreFeed.STORIES   to "",
         StoryGenreFeed.ENTERTAINMENT   to "",
         StoryGenreFeed.ARTICLES   to "",
-        StoryGenreFeed.DOCTOR     to "",
+        StoryGenreFeed.SPORTS     to "",
         StoryGenreFeed.MOVIES    to ""
     )
     LazyRow(
@@ -220,8 +220,7 @@ fun CategoryChip( //private
     ) {
         Text(
             text       = label,
-            fontSize   = 13.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = InkTheme.typography.bodyMedium,
             color      = if (isActive) Color.White else InkTheme.colors.textSecondary,
         )
     }

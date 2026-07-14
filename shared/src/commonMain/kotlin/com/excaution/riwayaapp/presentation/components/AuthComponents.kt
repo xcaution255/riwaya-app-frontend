@@ -46,16 +46,7 @@ import com.excaution.riwayaapp.presentation.theme.TextMuted
 import com.excaution.riwayaapp.presentation.theme.TextPrimary
 import com.excaution.riwayaapp.presentation.theme.TextSecondary
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  AUTH FIELD STATE
-// ─────────────────────────────────────────────────────────────────────────────
-
 enum class AuthFieldState { IDLE, FOCUSED, VALID, ERROR }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  BRAND HEADER (logo + wordmark)
-// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 fun AuthBrandHeader(modifier: Modifier = Modifier) {
@@ -91,28 +82,23 @@ fun AuthHeader(
     ) {
         Text(
             text          = tag,
-            fontSize      = 10.sp,
-            fontWeight    = FontWeight.Bold,
             color         = tagColor,
-            letterSpacing = 1.2.sp,
+            style = InkTheme.typography.labelSmall
         )
         Spacer(Modifier.height(5.dp))
         Text(
             text          = title,
             fontSize      = 22.sp,
-            fontWeight    = FontWeight.ExtraBold,
+            style = InkTheme.typography.displayLarge,
             color         = InkTheme.colors.textPrimary,
-            letterSpacing = (-0.5).sp,
-            lineHeight    = 28.sp,
             textAlign     = if (centered) TextAlign.Center else TextAlign.Start,
         )
         if (subtitle.isNotEmpty()) {
             Spacer(Modifier.height(4.dp))
             Text(
                 text      = subtitle,
-                fontSize  = 13.sp,
+                style = InkTheme.typography.titleMedium,
                 color     = InkTheme.colors.textMuted,
-                lineHeight = 19.sp,
                 textAlign  = if (centered) TextAlign.Center else TextAlign.Start,
             )
         }
@@ -172,10 +158,8 @@ fun AuthField(
     ) {
         Text(
             text          = label.uppercase(),
-            fontSize      = 10.sp,
-            fontWeight    = FontWeight.Bold,
+            style = InkTheme.typography.labelSmall,
             color         = InkTheme.colors.textMuted,
-            letterSpacing = 0.8.sp,
         )
         BasicTextField(
             value         = value,
@@ -213,7 +197,7 @@ fun AuthField(
                 ) {
                     Box(modifier = Modifier.weight(1f)) {
                         if (value.isEmpty()) {
-                            Text(placeholder, fontSize = 14.sp, color = InkTheme.colors.textFaint)
+                            Text(placeholder,  style = InkTheme.typography.bodyMedium ,color = InkTheme.colors.textFaint)
                         }
                         inner()
                     }
@@ -307,8 +291,7 @@ fun PasswordStrengthRow(password: String) {
         }
         Text(
             text       = strength.label,
-            fontSize   = 10.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = InkTheme.typography.labelSmall,
             color      = strength.color,
         )
     }
@@ -355,8 +338,7 @@ fun AuthPrimaryButton(
                 }
                 Text(
                     text = text,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = InkTheme.typography.titleMedium,
                     color = Color.White,
                     letterSpacing = (-0.2).sp
                 )
@@ -398,8 +380,7 @@ fun AuthGhostButton(
             }
             Text(
                 text = text,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
+                style = InkTheme.typography.titleMedium,
                 color = InkTheme.colors.textSecondary
             )
         }
@@ -417,7 +398,7 @@ fun AuthDivider(label: String = "or continue with") {
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         HorizontalDivider(modifier = Modifier.weight(1f), color = InkTheme.colors.bgBorder, thickness = 0.5.dp)
-        Text(label, fontSize = 11.sp, color = InkTheme.colors.textFaint)
+        Text(label, style = InkTheme.typography.bodySmall, color = InkTheme.colors.textFaint)
         HorizontalDivider(modifier = Modifier.weight(1f), color = InkTheme.colors.bgBorder, thickness = 0.5.dp)
     }
 }
@@ -454,7 +435,7 @@ private fun SocialButton(label: String, onClick: () -> Unit, modifier: Modifier 
                 modifier = Modifier.size(16.dp),
             )
             Spacer(Modifier.width(6.dp))
-            Text(label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = InkTheme.colors.textSecondary)
+            Text(label, style = InkTheme.typography.titleMedium, color = InkTheme.colors.textSecondary)
         }
     }
 }
@@ -540,7 +521,7 @@ fun ErrorBanner(message: String) {
             .padding(horizontal = 13.dp, vertical = 10.dp),
     ) {
         Icon(Icons.Rounded.ErrorOutline, contentDescription = null, tint = InkTheme.colors.dangerRed, modifier = Modifier.size(16.dp))
-        Text(message, fontSize = 12.sp, color = InkTheme.colors.dangerRed, lineHeight = 17.sp)
+        Text(message, style = InkTheme.typography.bodySmall, color = InkTheme.colors.dangerRed)
     }
 }
 
@@ -564,7 +545,7 @@ fun InfoHintBox(
             .padding(horizontal = 13.dp, vertical = 10.dp),
     ) {
         Icon(Icons.Rounded.Info, contentDescription = null, tint = tint, modifier = Modifier.size(14.dp).padding(top = 1.dp))
-        Text(text, fontSize = 11.sp, color = InkTheme.colors.textMuted, lineHeight = 17.sp)
+        Text(text, style = InkTheme.typography.bodySmall, color = InkTheme.colors.textMuted)
     }
 }
 
@@ -597,6 +578,7 @@ fun AuthScaffold(content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(top = 24.dp)
             .background(InkTheme.colors.bgDeep)
             .verticalScroll(rememberScrollState()),
         content = content,

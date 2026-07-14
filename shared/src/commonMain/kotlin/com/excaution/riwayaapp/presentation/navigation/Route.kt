@@ -41,6 +41,8 @@ sealed interface Route {
         @Serializable
         data object PasswordRecoveryScreen
 
+        @Serializable
+        data object MainScreen
     }
 
     sealed interface Main : Route {

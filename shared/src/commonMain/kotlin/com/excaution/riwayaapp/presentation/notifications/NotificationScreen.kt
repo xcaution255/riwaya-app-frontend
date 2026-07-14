@@ -393,7 +393,7 @@ private fun NotifTopBar(
                             .background(InkTheme.colors.accentPrimary)
                             .padding(horizontal = 5.dp),
                     ) {
-                        Text(count.toString(), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(count.toString(), style = InkTheme.typography.labelSmall, color = Color.White)
                     }
                 }
             }
@@ -409,7 +409,7 @@ private fun NotifTopBar(
                     .clickable(onClick = onMarkAllRead)
                     .padding(horizontal = 12.dp, vertical = 6.dp),
             ) {
-                Text("Mark all read", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = InkTheme.colors.textSecondary)
+                Text("Mark all read", style = InkTheme.typography.bodySmall, color = InkTheme.colors.textSecondary)
             }
         } else {
             Spacer(Modifier.width(80.dp))
@@ -455,8 +455,7 @@ private fun FilterRow(
             ) {
                 Text(
                     text       = filter.label,
-                    fontSize   = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    style = InkTheme.typography.bodySmall,
                     color      = if (isActive) Color.White else InkTheme.colors.textSecondary,
                 )
             }
@@ -470,10 +469,8 @@ private fun FilterRow(
 private fun DateHeader(title: String) {
     Text(
         text          = title.uppercase(),
-        fontSize      = 10.sp,
-        fontWeight    = FontWeight.Bold,
+        style = InkTheme.typography.labelSmall,
         color         = InkTheme.colors.textFaint,
-        letterSpacing = 0.8.sp,
         modifier      = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
     )
 }
@@ -601,15 +598,14 @@ private fun NotifItemContent(
                             }
                         append(remaining)
                     },
-                    fontSize   = 13.sp,
-                    color      = InkTheme.colors.textSecondary,
-                    lineHeight = 19.sp,
+                    style = InkTheme.typography.bodyMedium,
+                    color      = InkTheme.colors.textSecondary
                 )
 
                 Spacer(Modifier.height(3.dp))
                 Text(
                     text     = notification.earningsLabel?.let { "$it · ${notification.timeLabel}" } ?: notification.timeLabel,
-                    fontSize = 11.sp,
+                    style = InkTheme.typography.bodySmall,
                     color    = if (notification.earningsLabel != null) InkTheme.colors.successGreen else InkTheme.colors.textFaint,
                     fontWeight = if (notification.earningsLabel != null) FontWeight.SemiBold else FontWeight.Normal,
                 )
@@ -626,7 +622,7 @@ private fun NotifItemContent(
                             .clip(RoundedCornerShape(8.dp))
                             .background(Brush.linearGradient(notification.coverGradient)),
                     ) {
-                        Text(notification.coverEmoji, fontSize = 18.sp)
+                        Text(notification.coverEmoji, style = InkTheme.typography.bodyLarge)
                     }
                 }
                 notification.actionLabel != null -> {
@@ -640,8 +636,7 @@ private fun NotifItemContent(
                     ) {
                         Text(
                             text       = notification.actionLabel,
-                            fontSize   = 11.sp,
-                            fontWeight = FontWeight.Bold,
+                            style = InkTheme.typography.bodySmall,
                             color      = Color.White,
                         )
                     }
@@ -656,8 +651,7 @@ private fun NotifItemContent(
                     ) {
                         Text(
                             text       = notification.badgeLabel,
-                            fontSize   = 10.sp,
-                            fontWeight = FontWeight.Bold,
+                            style = InkTheme.typography.labelSmall,
                             color      = notification.badgeColor,
                         )
                     }
@@ -700,8 +694,7 @@ private fun NotifAvatar(notification: Notification) {
             ) {
                 Text(
                     text       = notification.actorInitials,
-                    fontSize   = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = InkTheme.typography.titleMedium,
                     color      = Color.White,
                 )
             }
@@ -766,13 +759,12 @@ private fun EmptyState(filter: NotifFilter) {
         Spacer(Modifier.height(12.dp))
         Text(
             text       = "No ${filter.label.lowercase()} notifications",
-            fontSize   = 16.sp,
-            fontWeight = FontWeight.Bold,
+            style = InkTheme.typography.titleLarge,
             color      = InkTheme.colors.textSecondary,
         )
         Text(
             text      = "You're all caught up for now.",
-            fontSize  = 13.sp,
+            style = InkTheme.typography.titleMedium,
             color     = InkTheme.colors.textMuted,
             modifier  = Modifier.padding(top = 4.dp),
         )

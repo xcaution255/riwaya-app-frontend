@@ -6,11 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.excaution.riwayaapp.data.auth.AuthRepository
 import com.excaution.riwayaapp.presentation.books.BookStoreScreen
 import com.excaution.riwayaapp.presentation.home.HomeScreen
 import com.excaution.riwayaapp.presentation.navigation.bottombar.BottomViewModel
@@ -20,17 +20,17 @@ import com.excaution.riwayaapp.presentation.profile.ProfileScreen
 import com.excaution.riwayaapp.presentation.saved.SavedScreen
 import com.excaution.riwayaapp.presentation.search.SearchScreen
 import com.excaution.riwayaapp.presentation.theme.InkTheme
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun MainScaffold(
-    onLogout: () -> Unit
-) {
+fun MainScreen() {
     val bottomVM : BottomViewModel = koinViewModel()
     val bottomState by bottomVM.uiState.collectAsState()
 
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
+    val authRepository: AuthRepository = koinInject()
     
     Scaffold(
         containerColor = InkTheme.colors.bgDeep,
@@ -58,7 +58,7 @@ fun MainScaffold(
                 onNotificationClick = {navController.navigate(Route.Main.Notifications)}
             )}
             composable<Route.Main.BookShop> { BookStoreScreen() }
-            composable<Route.Main.Profile> { ProfileScreen(onLogout = onLogout)}
+            composable<Route.Main.Profile> { ProfileScreen(onLogout = {authRepository.logout()})}
             composable<Route.Main.Saved> { }
 
             composable<Route.Main.Notifications>(

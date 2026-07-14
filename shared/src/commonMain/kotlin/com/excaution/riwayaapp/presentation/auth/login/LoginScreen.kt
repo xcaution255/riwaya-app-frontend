@@ -6,17 +6,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.excaution.riwayaapp.presentation.auth.register.RegisterEvent
 import com.excaution.riwayaapp.presentation.components.AuthBrandHeader
 import com.excaution.riwayaapp.presentation.components.AuthDivider
 import com.excaution.riwayaapp.presentation.components.AuthField
@@ -28,7 +35,9 @@ import com.excaution.riwayaapp.presentation.components.ErrorBanner
 import com.excaution.riwayaapp.presentation.components.SocialButtonsRow
 import com.excaution.riwayaapp.presentation.theme.AccentPrimary
 import com.excaution.riwayaapp.presentation.theme.InkTheme
+import com.excaution.riwayaapp.presentation.theme.RiwayaAppTheme
 import com.excaution.riwayaapp.presentation.theme.TextFaint
+import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
@@ -37,10 +46,13 @@ fun LoginScreen(
     onNavigateToForgotPassword: () -> Unit,
     onLoginSuccess: () -> Unit,
 ) {
+    val viewModel: LoginViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsState()
     var email     by remember { mutableStateOf("") }
     var password  by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
+
 
     val emailState = when {
         email.isEmpty()     -> AuthFieldState.IDLE
@@ -50,12 +62,16 @@ fun LoginScreen(
     val passwordState = if (showError) AuthFieldState.ERROR else AuthFieldState.IDLE
 
     var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { visible = true }
+    LaunchedEffect(Unit) {
+        visible = true
+        viewModel.events.collect { event ->
+            when (event) {
+                LoginEvent.NavigateToHome -> {onLoginSuccess()}
+            }
+        }
+    }
 
     AuthScaffold {
-//        AnimatedVisibility(visible = visible, enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { -10 }) {
-//            AuthBrandHeader()
-//        }
         AnimatedVisibility(visible = visible, enter = fadeIn(tween(320, 50)) + slideInVertically(tween(320, 50)) { 20 }) {
             AuthHeader(
                 tag      = "",
@@ -71,8 +87,8 @@ fun LoginScreen(
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(340, 80)) + slideInVertically(tween(340, 80)) { 20 }) {
                 AuthField(
                     label         = "Email address",
-                    value         = email,
-                    onValueChange = { email = it; showError = false },
+                    value         = uiState.email,
+                    onValueChange = { viewModel.onEmailChange(it); showError = false },
                     placeholder   = "you@example.com",
                     state         = emailState,
                     keyboardType  = KeyboardType.Email,
@@ -84,8 +100,8 @@ fun LoginScreen(
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(355, 110)) + slideInVertically(tween(355, 110)) { 20 }) {
                 AuthField(
                     label         = "Password",
-                    value         = password,
-                    onValueChange = { password = it; showError = false },
+                    value         = uiState.password,
+                    onValueChange = { viewModel.onPasswordChange(it); showError = false },
                     placeholder   = "Your password",
                     state         = passwordState,
                     isPassword    = true,
@@ -124,20 +140,29 @@ fun LoginScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.padding(horizontal = 24.dp),
         ) {
+            uiState.errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(380, 170))) {
-                AuthPrimaryButton(
-                    text    = "Sign in",
-                    onClick = {
-                        if (email.isEmpty() || password.isEmpty()) {
-                            showError = true
-                        } else {
-                            isLoading = true
-                            onLoginSuccess()
-                        }
-                    },
-                    icon      = Icons.Rounded.Login,
-                    isLoading = isLoading,
-                )
+                if (uiState.isLoading)
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    ) else {
+                    AuthPrimaryButton(
+                        text = "Sign in",
+                        onClick = {
+//                            if (email.isEmpty() || password.isEmpty()) {
+//                                showError = true
+//                            } else {
+//                                isLoading = true
+//                                viewModel.login()
+//                            }
+                            viewModel.login()
+                        },
+                        icon = Icons.Rounded.Login,
+                        isLoading = uiState.isLoading,
+                    )
+                }
             }
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(410, 230))) {
                 Box(contentAlignment = Alignment.CenterEnd,
@@ -155,5 +180,6 @@ fun LoginScreen(
             }
         }
         Spacer(Modifier.height(24.dp))
+
     }
 }

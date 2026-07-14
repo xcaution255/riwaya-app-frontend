@@ -102,7 +102,7 @@ fun VerifyEmailScreen(
                         .border(0.5.dp, InkTheme.colors.accentPrimary.copy(alpha = 0.25f), RoundedCornerShape(20.dp))
                         .padding(horizontal = 14.dp, vertical = 5.dp),
                 ) {
-                    Text("EMAIL SENT", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = InkTheme.colors.accentLight, letterSpacing = 1.sp)
+                    Text("EMAIL SENT", style = InkTheme.typography.labelSmall, color = InkTheme.colors.accentLight, letterSpacing = 1.sp)
                 }
             }
         }
@@ -115,10 +115,8 @@ fun VerifyEmailScreen(
             ) {
                 Text(
                     text = "Check your inbox",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = InkTheme.colors.textPrimary,
-                    letterSpacing = (-0.4).sp,
+                    style = InkTheme.typography.headlineMedium,
+                    color = InkTheme.colors.textPrimary
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
@@ -213,8 +211,8 @@ private fun InfoCardRow(
             Icon(icon, null, tint = iconTint, modifier = Modifier.size(16.dp))
         }
         Column {
-            Text(title, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = InkTheme.colors.textPrimary)
-            Text(subtitle, fontSize = 11.sp, color = InkTheme.colors.textMuted)
+            Text(title, style = InkTheme.typography.bodySmall, color = InkTheme.colors.textPrimary)
+            Text(subtitle, style = InkTheme.typography.labelSmall, color = InkTheme.colors.textMuted)
         }
     }
 }

@@ -56,7 +56,7 @@ fun BookStoreScreen() {
             TopAppBar(
                 title = {
                     Text(
-                        text       = "Bookstore",
+                        text = "Bookstore",
                         fontSize   = 24.sp,
                         letterSpacing = (-0.8).sp,
                         style = LocalTextStyle.current.copy(
@@ -154,21 +154,17 @@ private fun PromoBanner(modifier: Modifier = Modifier) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text          = "LIMITED OFFER",
-                        fontSize      = 10.sp,
-                        fontWeight    = FontWeight.Bold,
-                        color         = InkTheme.colors.accentPrimary,
-                        letterSpacing = 0.8.sp,
+                        style = InkTheme.typography.bodySmall,
+                        color         = InkTheme.colors.accentPrimary
                     )
                     Text(
                         text          = "Summer Reading Sale",
-                        fontSize      = 15.sp,
-                        fontWeight    = FontWeight.ExtraBold,
-                        color         = InkTheme.colors.textPrimary,
-                        letterSpacing = (-0.3).sp,
+                        style = InkTheme.typography.titleLarge,
+                        color         = InkTheme.colors.textPrimary
                     )
                     Text(
                         text     = "Up to 40% off bestsellers this week",
-                        fontSize = 11.sp,
+                        style = InkTheme.typography.bodySmall,
                         color    = InkTheme.colors.textMuted,
                     )
                 }
@@ -184,8 +180,7 @@ private fun PromoBanner(modifier: Modifier = Modifier) {
             ) {
                 Text(
                     text       = "40% OFF",
-                    fontSize   = 11.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = InkTheme.typography.bodySmall,
                     color      = Color.White,
                 )
             }
@@ -210,7 +205,7 @@ private fun FilterChips(
             StoryGenreFeed.STORIES   to "Stories",
             StoryGenreFeed.ENTERTAINMENT   to "Entertainment",
             StoryGenreFeed.ARTICLES   to "Articles",
-            StoryGenreFeed.DOCTOR     to "Doctor",
+            StoryGenreFeed.SPORTS     to "Doctor",
             StoryGenreFeed.MOVIES    to "Movies",
         )
         items(filterItems) { (genre, label) ->
@@ -229,8 +224,7 @@ private fun FilterChips(
             ) {
                 Text(
                     text       = label,
-                    fontSize   = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    style = InkTheme.typography.bodySmall,
                     color      = if (isActive) Color.White else InkTheme.colors.textSecondary,
                 )
             }
@@ -340,7 +334,7 @@ private fun BookCard(
                         .background(book.coverGradient.first().copy(alpha = 0.8f))
                         .border(1.5.dp, book.genre.color.copy(alpha = 0.5f), CircleShape),
                 ) {
-                    Text(book.coverEmoji, fontSize = 20.sp)
+                    Text(book.coverEmoji, style = InkTheme.typography.titleLarge)
                 }
                 // Wishlist button
                 Box(
@@ -383,17 +377,14 @@ private fun BookCard(
                 Spacer(Modifier.height(3.dp))
                 Text(
                     text = book.title,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = InkTheme.typography.titleMedium,
                     color = InkTheme.colors.textPrimary,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    lineHeight = 17.sp,
-                    letterSpacing = (-0.1).sp,
                 )
                 Text(
                     text = book.author,
-                    fontSize = 11.sp,
+                    style = InkTheme.typography.bodySmall,
                     color = InkTheme.colors.textMuted,
                 )
                 Spacer(Modifier.height(6.dp))
@@ -410,16 +401,14 @@ private fun BookCard(
                     ) {
                         Text(
                             text = "$${book.price.format(2)}",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.ExtraBold,
+                            style = InkTheme.typography.titleLarge,
                             color = InkTheme.colors.accentLight,
                             letterSpacing = (-0.3).sp,
                         )
                         book.discountPercent?.let {
                             Text(
                                 text = "-$it%",
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = InkTheme.typography.labelSmall,
                                 color = InkTheme.colors.successGreen,
                             )
                         }

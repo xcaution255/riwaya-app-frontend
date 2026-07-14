@@ -12,57 +12,10 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-
-val InkFlowTypography = Typography(
-    displayLarge = TextStyle(
-        fontWeight = FontWeight.ExtraBold,
-        fontSize   = 28.sp,
-        lineHeight = 34.sp,
-        letterSpacing = (-0.5).sp,
-        color = TextPrimary,
-    ),
-    headlineMedium = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontSize   = 20.sp,
-        lineHeight = 26.sp,
-        letterSpacing = (-0.3).sp,
-        color = TextPrimary,
-    ),
-    titleLarge = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontSize   = 16.sp,
-        lineHeight = 22.sp,
-        letterSpacing = (-0.2).sp,
-        color = TextPrimary,
-    ),
-    titleMedium = TextStyle(
-        fontWeight = FontWeight.SemiBold,
-        fontSize   = 14.sp,
-        lineHeight = 20.sp,
-        color = TextPrimary,
-    ),
-    bodyMedium = TextStyle(
-        fontWeight = FontWeight.Normal,
-        fontSize   = 14.sp,
-        lineHeight = 20.sp,
-        color = TextSecondary,
-    ),
-    bodySmall = TextStyle(
-        fontWeight = FontWeight.Normal,
-        fontSize   = 12.sp,
-        lineHeight = 16.sp,
-        color = TextMuted,
-    ),
-    labelSmall = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontSize   = 10.sp,
-        lineHeight = 14.sp,
-        letterSpacing = 0.8.sp,
-        color = TextSecondary,
-    ),
-)
 
 //for light and dark theme
 data class InkColorScheme(
@@ -127,6 +80,11 @@ object InkTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalInkColors.current
+
+    val typography: Typography
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.typography
 }
 
 // This provides a safe fallback structure if accessed outside the theme wrapper
@@ -164,6 +122,7 @@ fun RiwayaAppTheme(
     ) {
         MaterialTheme(
             colorScheme = materialColors,
+            typography = inkFlowTypography(),
             content = content
         )
     }

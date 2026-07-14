@@ -56,7 +56,7 @@ fun SearchBar() {
             ),
             decorationBox = { inner ->
                 if (query.isEmpty()) {
-                    Text("Search...", fontSize = 14.sp, color = InkTheme.colors.textFaint)
+                    Text("Search...", style = InkTheme.typography.bodyMedium, color = InkTheme.colors.textFaint)
                 }
                 inner()
             },

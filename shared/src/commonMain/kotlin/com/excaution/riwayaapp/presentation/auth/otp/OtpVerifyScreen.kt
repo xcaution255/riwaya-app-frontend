@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.excaution.riwayaapp.presentation.auth.register.RegisterEvent
 import com.excaution.riwayaapp.presentation.components.ArtIconWithRings
 import com.excaution.riwayaapp.presentation.components.AuthBackButton
 import com.excaution.riwayaapp.presentation.components.AuthGhostButton
@@ -49,6 +50,7 @@ import com.excaution.riwayaapp.presentation.theme.InkTheme
 import com.excaution.riwayaapp.presentation.theme.SuccessGreen
 import com.excaution.riwayaapp.presentation.theme.TextFaint
 import kotlinx.coroutines.delay
+import org.koin.compose.viewmodel.koinViewModel
 
 private const val OTP_LENGTH = 6
 
@@ -58,6 +60,9 @@ fun OtpVerifyScreen(
     onBack: () -> Unit,
     onVerified: () -> Unit,
 ) {
+
+    val viewModel: OtpVerifyViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsState()
     var otpValue  by remember { mutableStateOf("") }
     var hasError  by remember { mutableStateOf(false) }
     var timerSecs by remember { mutableIntStateOf(42) }
@@ -79,7 +84,12 @@ fun OtpVerifyScreen(
             hasError  = false
             isVerifying = true
             delay(800)
-            onVerified()
+            viewModel.events.collect { event ->
+                when (event) {
+                    OtpVerifyEvent.NavigateToHome(uiState.email) -> {onVerified()}
+                    else -> {}
+                }
+            }
         }
     }
 
@@ -135,10 +145,10 @@ fun OtpVerifyScreen(
             ) {
                 // Hidden text field for keyboard
                 BasicTextField(
-                    value         = otpValue,
+                    value         = uiState.otp,
                     onValueChange = { new ->
                         if (new.length <= OTP_LENGTH && new.all { it.isDigit() }) {
-                            otpValue = new
+                            viewModel.onOtpChange(new)
                             hasError = false
                         }
                     },

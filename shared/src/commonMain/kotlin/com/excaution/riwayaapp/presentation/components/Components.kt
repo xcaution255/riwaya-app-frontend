@@ -38,9 +38,7 @@ import com.excaution.riwayaapp.presentation.theme.TextFaint
 import com.excaution.riwayaapp.presentation.theme.TextMuted
 import com.excaution.riwayaapp.presentation.theme.TextPrimary
 import com.excaution.riwayaapp.presentation.theme.TextSecondary
-
-
-// ── Avatar / Initials Circle ─────────────────────────────────────────────────
+import io.ktor.utils.io.locks.synchronized
 
 @Composable
 fun InitialsAvatar(
@@ -75,10 +73,8 @@ fun GenreTag(
 ) {
     Text(
         text = label.uppercase(),
-        fontSize = 10.sp,
-        fontWeight = FontWeight.Bold,
+        style = InkTheme.typography.labelSmall,
         color = color,
-        letterSpacing = 0.8.sp,
         modifier = modifier,
     )
 }
@@ -105,7 +101,7 @@ fun StarRating(
             Spacer(Modifier.width(4.dp))
             Text(
                 text = "($reviewCount)",
-                fontSize = 11.sp,
+                style = InkTheme.typography.bodySmall,
                 color = InkTheme.colors.textMuted,
             )
         }
@@ -169,8 +165,7 @@ fun GradientButton(
             }
             Text(
                 text = text,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                style = InkTheme.typography.titleMedium,
                 color = Color.White,
             )
         }
@@ -218,8 +213,7 @@ fun SurfaceIconButton(
             ) {
                 Text(
                     text = badge.toString(),
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = InkTheme.typography.bodySmall,
                     color = Color.White,
                 )
             }
@@ -235,7 +229,7 @@ fun StatChip(icon: String, value: String) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp),
     ) {
-        Text(icon, fontSize = 11.sp)
-        Text(value, fontSize = 11.sp, color = TextFaint)
+        Text(icon, style = InkTheme.typography.bodySmall)
+        Text(value, style = InkTheme.typography.bodySmall, color = TextFaint)
     }
 }

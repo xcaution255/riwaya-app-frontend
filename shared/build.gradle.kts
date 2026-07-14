@@ -90,6 +90,8 @@ kotlin {
 
             // For local encrypted/plain JWT storage
             implementation("com.russhwolf:multiplatform-settings:1.3.0")
+            implementation("com.russhwolf:multiplatform-settings-coroutines:1.3.0")
+            implementation("com.russhwolf:multiplatform-settings-no-arg:1.3.0") //for settings android context
 
         }
         commonTest.dependencies {

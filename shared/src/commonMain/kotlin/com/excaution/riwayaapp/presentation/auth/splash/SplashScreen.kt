@@ -226,9 +226,8 @@ fun SplashScreen(onFinished: () -> Unit) {
                 Spacer(Modifier.height(10.dp))
                 Text(
                     text     = "Preparing your world…",
-                    fontSize = 11.sp,
-                    color    = InkTheme.colors.textFaint,
-                    letterSpacing = 0.3.sp,
+                    style = InkTheme.typography.bodySmall,
+                    color    = InkTheme.colors.textFaint
                 )
             }
         }

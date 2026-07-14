@@ -111,10 +111,8 @@ fun PasswordRecoveryScreen(
                 ) {
                     Text(
                         text = if (canSubmit) "READY TO SET" else "SET NEW PASSWORD",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = pillColor,
-                        letterSpacing = 1.sp,
+                        style = InkTheme.typography.labelSmall,
+                        color = pillColor
                     )
                 }
             }

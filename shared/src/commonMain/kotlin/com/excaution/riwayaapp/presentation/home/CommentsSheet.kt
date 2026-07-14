@@ -188,7 +188,7 @@ fun CommentsContent(
                         .background(InkTheme.colors.accentPrimary),
                 )
                 Icon(Icons.Rounded.PushPin, null, tint = InkTheme.colors.accentPrimary, modifier = Modifier.size(12.dp))
-                Text("Pinned by author", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = InkTheme.colors.accentPrimary)
+                Text("Pinned by author", style = InkTheme.typography.labelSmall, color = InkTheme.colors.accentPrimary)
                 Text("· \"${pinned.body.take(32)}…\"", fontSize = 11.sp, color = InkTheme.colors.textMuted, maxLines = 1)
             }
         }
@@ -203,8 +203,8 @@ fun CommentsContent(
                 .padding(horizontal = 16.dp, vertical = 10.dp),
         ) {
             Column {
-                Text("Comments", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = InkTheme.colors.textPrimary, letterSpacing = (-0.3).sp)
-                Text("${totalComments.toDouble().format(1)} comments", fontSize = 12.sp, color = InkTheme.colors.textMuted)
+                Text("Comments", style = InkTheme.typography.titleLarge, color = InkTheme.colors.textPrimary, letterSpacing = (-0.3).sp)
+                Text("${totalComments.toDouble().format(1)} comments", style = InkTheme.typography.bodySmall, color = InkTheme.colors.textMuted)
             }
             // Sort button
             Row(
@@ -218,7 +218,7 @@ fun CommentsContent(
                     .padding(horizontal = 10.dp, vertical = 6.dp),
             ) {
                 Icon(Icons.Rounded.SwapVert, null, tint = InkTheme.colors.textSecondary, modifier = Modifier.size(13.dp))
-                Text("Top", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = InkTheme.colors.textSecondary)
+                Text("Top", style = InkTheme.typography.bodySmall, color = InkTheme.colors.textSecondary)
             }
         }
 
@@ -289,7 +289,7 @@ fun CommentsContent(
                             .padding(horizontal = 14.dp, vertical = 9.dp),
                     ) {
                         if (inputText.isEmpty()) {
-                            Text("Add a comment…", fontSize = 13.sp, color = InkTheme.colors.textFaint)
+                            Text("Add a comment…", style = InkTheme.typography.bodyMedium, color = InkTheme.colors.textFaint)
                         }
                         inner()
                     }
@@ -363,7 +363,7 @@ private fun CommentItem(
                         .clip(CircleShape)
                         .background(Brush.linearGradient(comment.authorGradient)),
                 ) {
-                    Text(comment.authorInitial, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(comment.authorInitial, style = InkTheme.typography.titleMedium, color = Color.White)
                 }
 
                 Column(modifier = Modifier.weight(1f)) {
@@ -381,11 +381,11 @@ private fun CommentItem(
                                     .border(0.5.dp, InkTheme.colors.accentPrimary.copy(alpha = 0.25f), CircleShape)
                                     .padding(horizontal = 7.dp, vertical = 2.dp),
                             ) {
-                                Text("AUTHOR", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = InkTheme.colors.accentLight, letterSpacing = 0.4.sp)
+                                Text("AUTHOR", style = InkTheme.typography.labelSmall, color = InkTheme.colors.accentLight, letterSpacing = 0.4.sp)
                             }
                         }
                         Spacer(Modifier.weight(1f))
-                        Text(comment.timeLabel, fontSize = 10.sp, color = InkTheme.colors.textFaint)
+                        Text(comment.timeLabel, style = InkTheme.typography.labelSmall, color = InkTheme.colors.textFaint)
                     }
 
                     Spacer(Modifier.height(3.dp))
@@ -393,9 +393,8 @@ private fun CommentItem(
                     // Body
                     Text(
                         text       = comment.body,
-                        fontSize   = 13.sp,
-                        color      = InkTheme.colors.textSecondary,
-                        lineHeight = 19.sp,
+                        style = InkTheme.typography.titleMedium,
+                        color      = InkTheme.colors.textSecondary
                     )
 
                     // Reaction pills
@@ -422,8 +421,7 @@ private fun CommentItem(
                         )
                         Text(
                             text     = if (comment.replies.isNotEmpty()) "Reply · ${comment.replies.size}" else "Reply",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
+                            style = InkTheme.typography.bodySmall,
                             color    = if (repliesExpanded) InkTheme.colors.accentPrimary else InkTheme.colors.textFaint,
                             modifier = Modifier.clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) {
                                 if (comment.replies.isNotEmpty()) repliesExpanded = !repliesExpanded
@@ -484,10 +482,10 @@ private fun ReplyItem(reply: Comment, index: Int) {
         }
         Column {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(reply.authorName, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = InkTheme.colors.textPrimary)
-                Text(reply.timeLabel, fontSize = 10.sp, color = InkTheme.colors.textFaint)
+                Text(reply.authorName, style = InkTheme.typography.labelSmall, color = InkTheme.colors.textPrimary)
+                Text(reply.timeLabel, style = InkTheme.typography.labelSmall, color = InkTheme.colors.textFaint)
             }
-            Text(reply.body, fontSize = 12.sp, color = InkTheme.colors.textSecondary, lineHeight = 18.sp)
+            Text(reply.body, style = InkTheme.typography.bodySmall, color = InkTheme.colors.textSecondary, lineHeight = 18.sp)
         }
     }
 }
@@ -521,7 +519,7 @@ private fun ReactionPill(emoji: String, count: Int) {
         Text(emoji, fontSize = 12.sp)
         Text(
             text = count.toString(),
-            fontSize = 11.sp,
+            style = InkTheme.typography.bodySmall,
             color = if (picked) InkTheme.colors.accentLight else InkTheme.colors.textMuted,
             fontWeight = if (picked) FontWeight.Bold else FontWeight.Normal,
         )
@@ -556,7 +554,7 @@ private fun LikeButton(count: Int, isLiked: Boolean, onClick: () -> Unit) {
         ) { c ->
             Text(
                 text = if (c >= 1000) "${c / 1000}.${(c % 1000) / 100}k" else c.toString(),
-                fontSize = 11.sp,
+                style = InkTheme.typography.bodySmall,
                 color    = color,
                 fontWeight = if (isLiked) FontWeight.Bold else FontWeight.Normal,
             )

@@ -7,7 +7,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,14 +34,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.getValue
@@ -66,8 +63,6 @@ import com.excaution.riwayaapp.domain.model.SampleData
 import com.excaution.riwayaapp.domain.model.Story
 import com.excaution.riwayaapp.domain.model.StoryGenreFeed
 import com.excaution.riwayaapp.presentation.components.GenreTag
-import com.excaution.riwayaapp.presentation.components.InitialsAvatar
-import com.excaution.riwayaapp.presentation.components.PressScaleButton
 import com.excaution.riwayaapp.presentation.components.StatChip
 import com.excaution.riwayaapp.presentation.theme.GradientAccent
 import com.excaution.riwayaapp.presentation.theme.InkTheme
@@ -158,7 +153,7 @@ fun CategoryChips( //private
         StoryGenreFeed.STORIES   to "",
         StoryGenreFeed.ENTERTAINMENT   to "",
         StoryGenreFeed.ARTICLES   to "",
-        StoryGenreFeed.DOCTOR     to "",
+        StoryGenreFeed.SPORTS     to "",
         StoryGenreFeed.MOVIES    to ""
     )
     LazyRow(
@@ -202,8 +197,7 @@ fun CategoryChip( //private
     ) {
         Text(
             text       = label,
-            fontSize   = 13.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = InkTheme.typography.bodyMedium,
             color      = if (isActive) Color.White else InkTheme.colors.textSecondary,
         )
     }
@@ -264,7 +258,7 @@ private fun StoryListItem(story: Story, onClick: () -> Unit) {
                     .background(story.coverGradient.first().copy(alpha = 0.8f))
                     .border(1.dp, story.genre.color.copy(alpha = 0.5f), CircleShape),
             ) {
-                Text(story.coverEmoji, fontSize = 16.sp)
+                Text(story.coverEmoji, style = InkTheme.typography.bodyLarge)
             }
         }
 
@@ -274,16 +268,14 @@ private fun StoryListItem(story: Story, onClick: () -> Unit) {
             Spacer(Modifier.height(2.dp))
             Text(
                 text = story.title,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                style = InkTheme.typography.titleLarge,
                 color = InkTheme.colors.textPrimary,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                letterSpacing = (-0.2).sp,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text     = "by ${story.author}",
-                fontSize = 12.sp,
+                style = InkTheme.typography.bodySmall,
                 color    = InkTheme.colors.textMuted,
             )
             Spacer(Modifier.height(6.dp))

@@ -1,7 +1,7 @@
 package com.excaution.riwayaapp
 
 import android.app.Application
-import com.excaution.riwayaapp.di.initKoin
+import com.excaution.riwayaapp.core.di.initKoin
 
 class App: Application() {
     override fun onCreate() {

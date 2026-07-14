@@ -13,16 +13,14 @@ import com.excaution.riwayaapp.presentation.theme.GradientMystery
 import com.excaution.riwayaapp.presentation.theme.GradientRomance
 import com.excaution.riwayaapp.presentation.theme.GradientSciFi
 
-// ── Data model ────────────────────────────────────────────────────────────────
 
 enum class StoryGenreFeed(val label: String, val color: Color, val bgAlpha: Float) {
     ALL      ("All", AccentPrimary, 0.12f),
     STORIES  ("Stories",   Color(0xFFA78BFA), 0.12f),
     ENTERTAINMENT  ("Entertainment",   Color(0xFF4ADE80), 0.10f),
     ARTICLES  ("Articles",   Color(0xFFEF9F27), 0.10f),
-    DOCTOR    ("Doctor",    Color(0xFF60A5FA), 0.12f),
+    SPORTS    ("Sports",    Color(0xFF60A5FA), 0.12f),
     MOVIES   ("Movies",    Color(0xFFE24B4A), 0.10f),
-    ADVENTURE("Adventure", Color(0xFFF472B6), 0.10f),
 }
 
 data class StoryFeedItem(
@@ -124,7 +122,7 @@ object SampleData {
         ),
         Story(
             id = 4, title = "Echoes Beyond Orion", author = "Sol Martinez",
-            authorInitial = "S", genre = StoryGenreFeed.DOCTOR,
+            authorInitial = "S", genre = StoryGenreFeed.SPORTS,
             readTimeMin = 62, likes = "201k", comments = "14k", reads = "580k",
             coverGradient = GradientSciFi, coverEmoji = "🚀",
         ),
@@ -155,7 +153,7 @@ object SampleData {
         ),
         Story(
             id = 9, title = "Echoes Beyond Orion", author = "Sol Martinez",
-            authorInitial = "S", genre = StoryGenreFeed.DOCTOR,
+            authorInitial = "S", genre = StoryGenreFeed.SPORTS,
             readTimeMin = 62, likes = "201k", comments = "14k", reads = "580k",
             coverGradient = GradientSciFi, coverEmoji = "🚀",
         ),
@@ -188,7 +186,7 @@ object SampleData {
         ),
         Book(
             id = 4, title = "Starfall Protocol", author = "Sol Martinez",
-            genre = StoryGenreFeed.DOCTOR, price = 7.99, originalPrice = 11.99,
+            genre = StoryGenreFeed.SPORTS, price = 7.99, originalPrice = 11.99,
             rating = 4.0f, reviewCount = "3,678",
             coverGradient = GradientSciFi, coverEmoji = "🚀",
         ),
@@ -218,7 +216,7 @@ object SampleData {
         ),
         Book(
             id = 9, title = "Starfall Protocol", author = "Sol Martinez",
-            genre = StoryGenreFeed.DOCTOR, price = 7.99, originalPrice = 11.99,
+            genre = StoryGenreFeed.SPORTS, price = 7.99, originalPrice = 11.99,
             rating = 4.0f, reviewCount = "3,678",
             coverGradient = GradientSciFi, coverEmoji = "🚀",
         ),

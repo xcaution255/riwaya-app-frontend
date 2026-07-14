@@ -37,8 +37,6 @@ import com.excaution.riwayaapp.presentation.theme.InkTheme
 import com.excaution.riwayaapp.presentation.theme.LocalThemeController
 import kotlinx.coroutines.launch
 
-// ── Data ─────────────────────────────────────────────────────────────────────
-
 data class UserProfile(
     val firstName: String  = "Augustino",
     val lastName: String   = "J",
@@ -247,7 +245,7 @@ private fun ProfileHero(
                     tint = InkTheme.colors.textSecondary,
                     modifier = Modifier.size(13.dp),
                 )
-                Text("Edit cover", fontSize = 11.sp, color = InkTheme.colors.textSecondary)
+                Text("Edit cover", style = InkTheme.typography.bodySmall, color = InkTheme.colors.textSecondary)
             }
         }
 
@@ -275,8 +273,7 @@ private fun ProfileHero(
                 ) {
                     Text(
                         text = profile.firstName.first().uppercase(),
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                        style = InkTheme.typography.headlineMedium,
                         color = Color.White,
                     )
                 }
@@ -295,24 +292,16 @@ private fun ProfileHero(
 
             Spacer(Modifier.height(10.dp))
             Text(
-                text = "${profile.firstName} ${profile.lastName}",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = InkTheme.colors.textPrimary,
-                letterSpacing = (-0.4).sp,
-            )
-            Text(
                 text = "${profile.username} · ${profile.memberSince}",
-                fontSize = 12.sp,
+                style = InkTheme.typography.titleMedium,
                 color = InkTheme.colors.textMuted,
             )
             Spacer(Modifier.height(8.dp))
             Text(
                 text = profile.bio,
-                fontSize = 13.sp,
+                style = InkTheme.typography.bodyMedium,
                 color = InkTheme.colors.textSecondary,
                 textAlign = TextAlign.Center,
-                lineHeight = 19.sp,
                 modifier = Modifier.padding(horizontal = 32.dp),
             )
             Spacer(Modifier.height(12.dp))
@@ -335,8 +324,7 @@ private fun ProfileHero(
                     )
                     Text(
                         text = "Edit profile",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        style = InkTheme.typography.bodyMedium,
                         color = InkTheme.colors.accentPrimary,
                     )
                 }
@@ -379,14 +367,12 @@ private fun ProfileStats(profile: UserProfile) {
             ) {
                 Text(
                     text = value,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = InkTheme.colors.textPrimary,
-                    letterSpacing = (-0.3).sp,
+                    style = InkTheme.typography.titleLarge,
+                    color = InkTheme.colors.textPrimary
                 )
                 Text(
                     text = label,
-                    fontSize = 10.sp,
+                    style = InkTheme.typography.bodySmall,
                     color = InkTheme.colors.textMuted,
                     letterSpacing = 0.4.sp,
                 )
@@ -401,10 +387,8 @@ private fun ProfileStats(profile: UserProfile) {
 private fun SectionLabel(title: String) {
     Text(
         text = title.uppercase(),
-        fontSize = 10.sp,
-        fontWeight = FontWeight.Bold,
+        style = InkTheme.typography.labelSmall,
         color = InkTheme.colors.textFaint,
-        letterSpacing = 0.8.sp,
         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
     )
 }
@@ -470,7 +454,7 @@ private fun NavigableItem(item: ProfileMenuItem.Navigable) {
             if (item.subtitle != null) {
                 Text(
                     text = item.subtitle,
-                    fontSize = 11.sp,
+                    style = InkTheme.typography.titleMedium,
                     color = InkTheme.colors.textMuted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -488,7 +472,7 @@ private fun NavigableItem(item: ProfileMenuItem.Navigable) {
                         .background(InkTheme.colors.accentPrimary)
                         .padding(horizontal = 7.dp, vertical = 2.dp),
                 ) {
-                    Text(item.badge, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(item.badge, style = InkTheme.typography.labelSmall, color = Color.White)
                 }
             }
             Icon(
@@ -534,7 +518,7 @@ private fun ToggleItem(
         ) {
             Icon(imageVector = item.icon, contentDescription = null, tint = item.iconTint, modifier = Modifier.size(16.dp))
         }
-        Text(item.title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = InkTheme.colors.textPrimary, modifier = Modifier.weight(1f))
+        Text(item.title, fontSize = 14.sp, style = InkTheme.typography.titleMedium, color = InkTheme.colors.textPrimary, modifier = Modifier.weight(1f))
         // Custom toggle track
         Box(
             modifier = Modifier
@@ -585,7 +569,7 @@ private fun SignOutButton(onClick: () -> Unit) {
                 modifier           = Modifier.size(18.dp),
             )
             Spacer(Modifier.width(8.dp))
-            Text("Sign out", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = InkTheme.colors.dangerRed)
+            Text("Sign out", style = InkTheme.typography.titleMedium, color = InkTheme.colors.dangerRed)
         }
     }
 }
@@ -619,10 +603,8 @@ private fun EditProfileSheet(
         ) {
             Text(
                 text          = "Edit profile",
-                fontSize      = 16.sp,
-                fontWeight    = FontWeight.ExtraBold,
-                color         = InkTheme.colors.textPrimary,
-                letterSpacing = (-0.3).sp,
+                style = InkTheme.typography.titleLarge,
+                color         = InkTheme.colors.textPrimary
             )
             Box(
                 contentAlignment = Alignment.Center,
@@ -667,7 +649,7 @@ private fun EditProfileSheet(
                 }
             }
             Spacer(Modifier.height(8.dp))
-            Text("Change photo", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = InkTheme.colors.accentPrimary, modifier = Modifier.clickable { })
+            Text("Change photo", style = InkTheme.typography.titleSmall, color = InkTheme.colors.accentPrimary, modifier = Modifier.clickable { })
         }
 
         Spacer(Modifier.height(20.dp))
@@ -718,10 +700,8 @@ private fun SheetField(
     ) {
         Text(
             text          = label.uppercase(),
-            fontSize      = 10.sp,
-            fontWeight    = FontWeight.Bold,
-            color         = InkTheme.colors.textMuted,
-            letterSpacing = 0.6.sp,
+            style = InkTheme.typography.labelSmall,
+            color         = InkTheme.colors.textMuted
         )
         BasicTextField(
             value         = value,

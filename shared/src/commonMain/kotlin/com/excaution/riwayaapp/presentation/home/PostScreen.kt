@@ -65,11 +65,8 @@ fun StoryFeedCard(
             // ── Title ─────────────────────────────────────────────────────────
             Text(
                 text       = item.title,
-                fontSize   = 20.sp,
-                fontWeight = FontWeight.ExtraBold,
+                style = InkTheme.typography.headlineMedium,
                 color      = InkTheme.colors.textPrimary,
-                lineHeight = 21.sp,
-                letterSpacing = (-0.3).sp,
                 modifier   = Modifier.padding(bottom = 7.dp),
             )
 
@@ -84,10 +81,9 @@ fun StoryFeedCard(
                 if (expanded) {
                     // Full story body
                     Text(
-                        text       = item.fullBody,
-                        fontSize   = 16.sp,
-                        color      = InkTheme.colors.textSecondary,
-                        lineHeight = 21.sp,
+                        text = item.fullBody,
+                        style = InkTheme.typography.bodyLarge,
+                        color  = InkTheme.colors.textSecondary,
                         modifier = Modifier
                             .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) { isExpanded = !isExpanded }
                     )
@@ -97,9 +93,8 @@ fun StoryFeedCard(
                         Box {
                             Text(
                                 text       = item.previewBody,
-                                fontSize   = 16.sp,
+                                style = InkTheme.typography.bodyLarge,
                                 color      = InkTheme.colors.textSecondary,
-                                lineHeight = 21.sp,
                                 maxLines   = 3,
                                 overflow   = TextOverflow.Ellipsis,
                                 modifier = Modifier.clickable { isExpanded = true }
@@ -119,8 +114,7 @@ fun StoryFeedCard(
                         }
                         Text(
                             text       = "Read more",
-                            fontSize   = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
+                            style = InkTheme.typography.labelSmall,
                             color      = InkTheme.colors.accentLight,
                             modifier   = Modifier
                                 .padding(top = 4.dp)
@@ -162,7 +156,7 @@ fun StoryFeedCard(
                 )
 
                 Spacer(Modifier.weight(1f))
-                item.timeAgo?.let { Text(it, fontSize = 11.sp, color = InkTheme.colors.textFaint) }
+                item.timeAgo?.let { Text(it, style = InkTheme.typography.bodySmall, color = InkTheme.colors.textFaint) }
 
             }
         }
@@ -183,10 +177,8 @@ private fun GenrePill(genre: StoryGenreFeed) {
     ) {
         Text(
             text       = genre.label.uppercase(),
-            fontSize   = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color      = genre.color,
-            letterSpacing = 0.5.sp,
+            style = InkTheme.typography.labelSmall,
+            color      = genre.color
         )
     }
 }
@@ -198,7 +190,7 @@ private fun MetaChip(icon: ImageVector, label: String) {
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Icon(icon, null, tint = InkTheme.colors.textFaint, modifier = Modifier.size(13.dp))
-        Text(label, fontSize = 11.sp, color = InkTheme.colors.textFaint)
+        Text(label, style = InkTheme.typography.bodySmall, color = InkTheme.colors.textFaint)
     }
 }
 
@@ -224,7 +216,7 @@ private fun EngageChip(
 
     ) {
         Icon(icon, null, tint = tint, modifier = Modifier.size(13.dp))
-        Text(label, fontSize = 10.sp, color = tint)
+        Text(label, style = InkTheme.typography.labelSmall, color = tint)
 
     }
 }

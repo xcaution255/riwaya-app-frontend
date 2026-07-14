@@ -94,7 +94,7 @@ fun ForgotPasswordScreen(
                                 .background(InkTheme.colors.genreMystery)
                                 .border(2.dp, InkTheme.colors.bgDeep, CircleShape),
                         ) {
-                            Text("?", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                            Text("?", style = InkTheme.typography.bodySmall, color = Color.White)
                         }
                     }
                 )
@@ -111,7 +111,7 @@ fun ForgotPasswordScreen(
                         .border(0.5.dp, InkTheme.colors.genreMystery.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
                         .padding(horizontal = 14.dp, vertical = 5.dp),
                 ) {
-                    Text("ACCOUNT RECOVERY", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = InkTheme.colors.genreMystery, letterSpacing = 1.sp)
+                    Text("ACCOUNT RECOVERY", style = InkTheme.typography.labelSmall, color = InkTheme.colors.genreMystery, letterSpacing = 1.sp)
                 }
             }
         }
@@ -156,11 +156,6 @@ fun ForgotPasswordScreen(
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-//  PASSWORD RECOVERY (SET NEW PASSWORD) SCREEN
-// ═══════════════════════════════════════════════════════════════════════════════
-
-
 // ── Requirements checklist ────────────────────────────────────────────────────
 
 @Composable
@@ -192,7 +187,7 @@ fun PasswordRequirements(requirements: List<Pair<String, Boolean>>) {
                 )
                 Text(
                     text       = label,
-                    fontSize   = 12.sp,
+                    style = InkTheme.typography.bodySmall,
                     color      = if (met) InkTheme.colors.textPrimary else InkTheme.colors.textMuted,
                     fontWeight = if (met) FontWeight.SemiBold else FontWeight.Normal,
                 )
