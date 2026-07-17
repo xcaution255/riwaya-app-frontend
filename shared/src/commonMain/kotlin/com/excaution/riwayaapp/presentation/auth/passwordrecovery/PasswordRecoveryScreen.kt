@@ -22,9 +22,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Security
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +40,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.excaution.riwayaapp.presentation.auth.login.LoginEvent
+import com.excaution.riwayaapp.presentation.auth.login.LoginViewModel
 import com.excaution.riwayaapp.presentation.components.AuthBackButton
 import com.excaution.riwayaapp.presentation.components.AuthField
 import com.excaution.riwayaapp.presentation.components.AuthFieldState
@@ -48,29 +52,33 @@ import com.excaution.riwayaapp.presentation.components.PasswordStrengthRow
 import com.excaution.riwayaapp.presentation.components.evaluatePassword
 import com.excaution.riwayaapp.presentation.theme.GradientAccent
 import com.excaution.riwayaapp.presentation.theme.InkTheme
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun PasswordRecoveryScreen(
     onBack: () -> Unit,
     onPasswordSet: () -> Unit,
 ) {
+
+    val viewModel: PasswordRecoveryViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsState()
     var newPassword     by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var isLoading       by remember { mutableStateOf(false) }
 
-    val passwordsMatch = newPassword.isNotEmpty() && newPassword == confirmPassword
-    val strength       = evaluatePassword(newPassword)
+    val passwordsMatch = uiState.password.isNotEmpty() && uiState.password == uiState.confPassword
+    val strength = evaluatePassword(uiState.confPassword)
 
     val confirmState = when {
-        confirmPassword.isEmpty()  -> AuthFieldState.IDLE
-        passwordsMatch             -> AuthFieldState.VALID
-        else                       -> AuthFieldState.ERROR
+        uiState.confPassword.isEmpty()  -> AuthFieldState.IDLE
+        passwordsMatch -> AuthFieldState.VALID
+        else -> AuthFieldState.ERROR
     }
 
     val requirements = listOf(
-        "At least 8 characters"   to (newPassword.length >= 8),
-        "One uppercase letter"    to newPassword.any { it.isUpperCase() },
-        "One number or symbol"    to newPassword.any { it.isDigit() || !it.isLetterOrDigit() },
+        "At least 8 characters"   to (uiState.password.length >= 8),
+        "One uppercase letter"    to uiState.password.any { it.isUpperCase() },
+        "One number or symbol"    to uiState.password.any { it.isDigit() || !it.isLetterOrDigit() },
         "Passwords match"         to passwordsMatch,
     )
 
@@ -78,6 +86,16 @@ fun PasswordRecoveryScreen(
 
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
+
+
+    LaunchedEffect(Unit) {
+        visible = true
+        viewModel.events.collect { event ->
+            when (event) {
+                RecoveryPasswordEvent.NavigateToLogin -> {onPasswordSet()}
+            }
+        }
+    }
 
     AuthScaffold {
         AnimatedVisibility(visible = visible, enter = fadeIn(tween(260))) {
@@ -133,30 +151,42 @@ fun PasswordRecoveryScreen(
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(360, 130)) + slideInVertically(tween(360, 130)) { 20 }) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     AuthField(
-                        label         = "New password",
-                        value         = newPassword,
-                        onValueChange = { newPassword = it },
-                        placeholder   = "Min. 8 characters",
-                        isPassword    = true,
-                        keyboardType  = KeyboardType.Password,
-                        imeAction     = ImeAction.Next,
+                        label = "OTP",
+                        value = uiState.otp,
+                        onValueChange = { viewModel.onOtpChange(it) },
+                        placeholder = "Enter OTP",
+                        imeAction = ImeAction.Next,
                     )
-                    if (newPassword.isNotEmpty()) {
-                        PasswordStrengthRow(password = newPassword)
+                }
+            }
+
+            AnimatedVisibility(visible = visible, enter = fadeIn(tween(360, 130)) + slideInVertically(tween(360, 130)) { 20 }) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    AuthField(
+                        label = "New password",
+                        value = uiState.password,
+                        onValueChange = { viewModel.onPasswordChange(it)},
+                        placeholder = "Password",
+                        isPassword = true,
+                        keyboardType  = KeyboardType.Password,
+                        imeAction = ImeAction.Next,
+                    )
+                    if (uiState.password.isNotEmpty()) {
+                        PasswordStrengthRow(password = uiState.password)
                     }
                 }
             }
 
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(370, 150)) + slideInVertically(tween(370, 150)) { 20 }) {
                 AuthField(
-                    label         = "Confirm password",
-                    value         = confirmPassword,
-                    onValueChange = { confirmPassword = it },
-                    placeholder   = "Re-enter password",
-                    state         = confirmState,
-                    isPassword    = true,
+                    label = "Confirm password",
+                    value = uiState.confPassword,
+                    onValueChange = { viewModel.onConformPasswordChange(it)},
+                    placeholder  = "Re-enter password",
+                    state = confirmState,
+                    isPassword = true,
                     keyboardType  = KeyboardType.Password,
-                    imeAction     = ImeAction.Done,
+                    imeAction  = ImeAction.Done,
                     trailingIcon  = when (confirmState) {
                         AuthFieldState.VALID -> Icons.Rounded.CheckCircle
                         AuthFieldState.ERROR -> Icons.Rounded.Error
@@ -173,13 +203,17 @@ fun PasswordRecoveryScreen(
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(390, 190))) {
                 AuthPrimaryButton(
                     text      = "Set new password",
-                    onClick   = { if (canSubmit) { isLoading = true; onPasswordSet() } },
+                    onClick   = { if (canSubmit) {
+                        isLoading = true
+                        viewModel.resetPassword()
+                    } },
                     icon      = Icons.Rounded.Security,
                     isLoading = isLoading,
                     gradient  = if (canSubmit) listOf(Color(0xFF22c55e), InkTheme.colors.successGreen)
                     else GradientAccent,
                 )
             }
+            uiState.errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         }
         Spacer(Modifier.height(28.dp))
     }

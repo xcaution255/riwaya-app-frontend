@@ -12,7 +12,7 @@ sealed interface Route {
 
     sealed interface Auth : Route {
         @Serializable
-        data object Login : Auth
+        data class Login(val email: String? = null) : Auth
 
         @Serializable
         data object Register : Auth

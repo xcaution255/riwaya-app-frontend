@@ -19,7 +19,7 @@ import kotlinx.serialization.Serializable
 @Serializable data class VerifyResetOtpRequest(val email: String, val otp: String)
 @Serializable data class VerifyResetOtpResponse(val resetToken: String) // short-lived token to authorize the reset
 
-@Serializable data class ResetPasswordRequest(val resetToken: String, val newPassword: String)
+@Serializable data class ResetPasswordRequest(val otp: String, val newPassword: String)
 @Serializable data class ResetPasswordResponse(val message: String)
 
 @Serializable data class RefreshRequest(val refreshToken: String)

@@ -24,6 +24,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.excaution.riwayaapp.presentation.auth.login.LoginEvent
+import com.excaution.riwayaapp.presentation.auth.login.LoginViewModel
+import com.excaution.riwayaapp.presentation.auth.otp.OtpVerifyEvent
 import com.excaution.riwayaapp.presentation.components.ArtIconWithRings
 import com.excaution.riwayaapp.presentation.components.AuthBackButton
 import com.excaution.riwayaapp.presentation.components.AuthDivider
@@ -48,14 +51,15 @@ import com.excaution.riwayaapp.presentation.theme.SuccessGreen
 import com.excaution.riwayaapp.presentation.theme.TextFaint
 import com.excaution.riwayaapp.presentation.theme.TextMuted
 import com.excaution.riwayaapp.presentation.theme.TextPrimary
-
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ForgotPasswordScreen(
     onBack: () -> Unit,
-    onSendLink: () -> Unit,
     onSendOtp: () -> Unit,
 ) {
+    val viewModel: ForgotPasswordViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsState()
     var email     by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
@@ -67,6 +71,16 @@ fun ForgotPasswordScreen(
 
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
+
+    LaunchedEffect(Unit) {
+        visible = true
+        viewModel.events.collect { event ->
+            when (event) {
+                ForgotPasswordEvent.NavigateToPasswordRecovery -> onSendOtp()
+            }
+        }
+    }
+
 
     AuthScaffold {
         AnimatedVisibility(visible = visible, enter = fadeIn(tween(260))) {
@@ -131,14 +145,14 @@ fun ForgotPasswordScreen(
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(360, 130)) + slideInVertically(tween(360, 130)) { 20 }) {
                 AuthField(
                     label         = "Email address",
-                    value         = email,
-                    onValueChange = { email = it },
+                    value         = uiState.email,
+                    onValueChange = { viewModel.onEmailChange(it) },
                     placeholder   = "you@example.com",
                     state         = emailState,
                     keyboardType  = KeyboardType.Email,
                     trailingIcon  = Icons.Rounded.AlternateEmail,
                     imeAction     = ImeAction.Go,
-                    onImeAction   = { if (email.contains("@")) { isLoading = true; onSendLink() } },
+//                    onImeAction   = { if (email.contains("@")) { isLoading = true; viewModel.forgotPassword() } },
                 )
             }
 
@@ -146,11 +160,12 @@ fun ForgotPasswordScreen(
             AnimatedVisibility(visible = visible, enter = fadeIn(tween(370, 150))) {
                 AuthPrimaryButton(
                     text      = "Get OTP",
-                    onClick   = { isLoading = true; onSendLink() },
+                    onClick   = { isLoading = true; viewModel.forgotPassword() },
                     icon      = Icons.Rounded.Send,
                     isLoading = isLoading,
                 )
             }
+            uiState.errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         }
         Spacer(Modifier.height(28.dp))
     }

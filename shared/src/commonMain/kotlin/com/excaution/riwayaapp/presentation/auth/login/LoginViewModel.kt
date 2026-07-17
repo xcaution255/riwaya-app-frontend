@@ -17,8 +17,16 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _events = Channel<LoginEvent>()
     val events = _events.receiveAsFlow()
 
+    // function to seed the email from the navigation layer
+    fun initEmail(email: String) {
+        if (email.isNotBlank()) {
+            _uiState.update { it.copy(email = email) }
+        }
+    }
+
     fun onEmailChange(v: String) = _uiState.update { it.copy(email = v, errorMessage = null) }
     fun onPasswordChange(v: String) = _uiState.update { it.copy(password = v, errorMessage = null) }
+
 
     fun login() = viewModelScope.launch {
         val state = _uiState.value

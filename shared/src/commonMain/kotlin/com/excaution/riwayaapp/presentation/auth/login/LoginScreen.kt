@@ -42,6 +42,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreen(
+    initialEmail: String,
     onNavigateToRegister: () -> Unit,
     onNavigateToForgotPassword: () -> Unit,
     onLoginSuccess: () -> Unit,
@@ -52,6 +53,11 @@ fun LoginScreen(
     var password  by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
+
+    // Automatically seed the field whenever an initialEmail value is passed
+    LaunchedEffect(initialEmail) {
+        viewModel.initEmail(initialEmail)
+    }
 
 
     val emailState = when {

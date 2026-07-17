@@ -44,10 +44,10 @@ class AuthApi(private val client: HttpClient) {
             }.body()
         }
 
-    suspend fun resetPassword(resetToken: String, newPassword: String): ApiResult<ResetPasswordResponse> =
+    suspend fun resetPassword(otp: String, newPassword: String): ApiResult<ResetPasswordResponse> =
         safeApiCall {
             client.post("/auth/reset-password") {
-                setBody(ResetPasswordRequest(resetToken, newPassword))
+                setBody(ResetPasswordRequest(otp, newPassword))
             }.body()
         }
 

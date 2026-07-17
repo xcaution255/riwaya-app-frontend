@@ -23,7 +23,7 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
             popExitTransition = NavAnimations.popExitSlideOut,
         ) {
             SplashScreen(
-                onFinished = {navController.navigate(Route.Auth.Login) {
+                onFinished = {navController.navigate(Route.Auth.Login()) {
                     popUpTo(Route.Auth.Splash) { inclusive = true }
                 } }
             )
@@ -35,8 +35,13 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
             exitTransition = NavAnimations.exitSlideOut,
             popEnterTransition = NavAnimations.popEnterSlideIn,
             popExitTransition = NavAnimations.popExitSlideOut,
-        ) {
+        ) { backStackEntry ->
+            // Extract the type-safe arguments from the route instance
+            val loginRoute = backStackEntry.toRoute<Route.Auth.Login>()
+
             LoginScreen(
+                // Pass the extracted email down to your login UI / ViewModel state
+                initialEmail = loginRoute.email ?: "",
                 onLoginSuccess = { navController.navigate(Route.Auth.MainScreen) },
                 onNavigateToRegister = { navController.navigate(Route.Auth.Register) },
                 onNavigateToForgotPassword = { navController.navigate(Route.Auth.ForgotPassword) },
@@ -53,7 +58,7 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
                 onRegisterSuccess = {email ->
                     //received email value straight to your type-safe route object
                     navController.navigate(Route.Auth.OtpVerify(email)) },
-                onNavigateToLogin = {navController.navigate(Route.Auth.Login)},
+                onNavigateToLogin = {navController.navigate(Route.Auth.Login())},
             )
         }
 
@@ -64,9 +69,8 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
             popExitTransition = NavAnimations.popExitSlideOut,
         ) {
             ForgotPasswordScreen(
-                onBack = {navController.navigate(Route.Auth.Login)},
-                onSendLink = {navController.navigate(Route.Auth.OtpVerify)},
-                onSendOtp = {navController.navigate(Route.Auth.Login)},
+                onBack = {navController.navigate(Route.Auth.Login())},
+                onSendOtp = {navController.navigate(Route.Auth.PasswordRecoveryScreen)},
             )
         }
 
@@ -79,9 +83,16 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
             // Type-safely extract the arguments from the route instance
             val otpRoute = backStackEntry.toRoute<Route.Auth.OtpVerify>()
             OtpVerifyScreen(
-                onBack = { navController.navigate(Route.Auth.Login) },
+                onBack = {
+                    // 1. Pass the email back to login, clearing the OTP screen from history
+                    navController.navigate(Route.Auth.Login(email = otpRoute.email)) {
+                        popUpTo<Route.Auth.OtpVerify> { inclusive = true }
+                    }},
                 email = otpRoute.email, // Use the extracted email string here
-                onVerified = { navController.navigate(Route.Auth.Login) }
+                onVerified = {  // 2. Also pass it if you want them to log in automatically after verification
+                    navController.navigate(Route.Auth.Login(email = otpRoute.email)) {
+                        popUpTo<Route.AuthGraph> { inclusive = true }
+                    }}
             )
         }
 
@@ -93,7 +104,7 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
         ) {
             VerifyEmailScreen(
                 email = "Augustinow206@gmail.com",
-                onBack = {navController.navigate(Route.Auth.Login)},
+                onBack = {navController.navigate(Route.Auth.Login())},
                 onEnterOtp = {navController.navigate(Route.Auth.OtpVerify)},
                 onResend = {}
             )
@@ -107,7 +118,7 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
         ) {
             PasswordRecoveryScreen(
                 onBack = {navController.navigate(Route.Auth.OtpVerify)},
-                onPasswordSet = {navController.navigate(Route.Auth.Login)}
+                onPasswordSet = {navController.navigate(Route.Auth.Login())}
             )
         }
 
