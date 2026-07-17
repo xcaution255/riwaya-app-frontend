@@ -25,9 +25,6 @@ fun SearchScreen() {
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {SearchBar()}
     ) {
-        Column(verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("backend status: ")
-        }
+        //item(key = "bottom-spacer") { Spacer(Modifier.height(40.dp)) }
     }
 }

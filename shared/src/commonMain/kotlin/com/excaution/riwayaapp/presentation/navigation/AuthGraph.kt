@@ -82,7 +82,7 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
             OtpVerifyScreen(
                 onBack = { navController.navigate(Route.Auth.Login) },
                 emailHint = "",
-                onVerified = { navController.navigate(Route.Main.Home) }
+                onVerified = { navController.navigate(Route.Auth.MainScreen) }
             )
         }
 

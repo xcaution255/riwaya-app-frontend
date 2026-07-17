@@ -159,6 +159,8 @@ fun ProfileScreen(
                 SignOutButton(onClick = onLogout)
                 Spacer(Modifier.height(8.dp))
             }
+
+            item(key = "bottom-spacer") { Spacer(Modifier.height(40.dp)) }
         }
     }
 

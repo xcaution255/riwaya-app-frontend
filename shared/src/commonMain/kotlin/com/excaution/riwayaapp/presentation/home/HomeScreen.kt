@@ -23,6 +23,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
@@ -135,6 +136,7 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
                         scope.launch { sheetState.show() }}
                 )
            }
+            item(key = "bottom-spacer") { Spacer(Modifier.height(40.dp)) }
         }
     }
     if (showSheet) {
@@ -162,8 +164,6 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
         }
     }
 }
-
-// ── Category Chips ───────────────────────────────────────────────────────────
 
 @Composable
 fun CategoryChips( //private

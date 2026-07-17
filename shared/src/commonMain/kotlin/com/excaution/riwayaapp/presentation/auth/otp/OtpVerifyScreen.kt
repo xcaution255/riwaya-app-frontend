@@ -79,8 +79,8 @@ fun OtpVerifyScreen(
     }
 
     // Auto-verify when 6 digits entered
-    LaunchedEffect(otpValue) {
-        if (otpValue.length == OTP_LENGTH) {
+    LaunchedEffect(uiState.otp) {
+        if (uiState.otp.length == OTP_LENGTH) {
             hasError  = false
             isVerifying = true
             delay(800)
@@ -165,11 +165,11 @@ fun OtpVerifyScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                     repeat(OTP_LENGTH) { index ->
                         OtpDigitBox(
-                            digit      = otpValue.getOrNull(index)?.toString() ?: "",
-                            isFilled   = index < otpValue.length,
-                            isCurrent  = index == otpValue.length,
+                            digit      = uiState.otp.getOrNull(index)?.toString() ?: "",
+                            isFilled   = index < uiState.otp.length,
+                            isCurrent  = index == uiState.otp.length,
                             hasError   = hasError,
-                            isSuccess  = isVerifying && otpValue.length == OTP_LENGTH,
+                            isSuccess  = isVerifying && uiState.otp.length == OTP_LENGTH,
                         )
                     }
                 }
@@ -196,8 +196,11 @@ fun OtpVerifyScreen(
                 AuthPrimaryButton(
                     text      = if (isVerifying) "Verifying…" else "Verify code",
                     onClick   = {
-                        if (otpValue.length < OTP_LENGTH) hasError = true
-                        else { isVerifying = true; onVerified() }
+                        if (uiState.otp.length < OTP_LENGTH) hasError = true
+                        else {
+                            viewModel.verifyEmailOtp()
+                            isVerifying = true;
+                        }
                     },
                     icon      = Icons.Rounded.CheckCircle,
                     isLoading = isVerifying,

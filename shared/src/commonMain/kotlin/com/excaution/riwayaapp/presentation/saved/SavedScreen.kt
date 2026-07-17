@@ -136,6 +136,7 @@ fun SavedScreen() {
                     )
                 }
             }
+            item(key = "bottom-spacer") { Spacer(Modifier.height(40.dp)) }
         }
     }
 }

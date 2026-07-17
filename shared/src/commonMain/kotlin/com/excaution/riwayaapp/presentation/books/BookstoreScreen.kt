@@ -98,6 +98,8 @@ fun BookStoreScreen() {
                     onAddToCart = { },
                 )
             }
+
+            item(key = "bottom-spacer") { Spacer(Modifier.height(40.dp)) }
         }
     }
 }

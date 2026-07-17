@@ -271,7 +271,7 @@ fun NotificationScreen(
         containerColor = InkTheme.colors.bgDeep,
         topBar = {
             NotifTopBar(
-                onBack       = onBack,
+                onBack = onBack,
                 onMarkAllRead = {
                     notifications = notifications.map { it.copy(isUnread = false) }
                 },
@@ -311,7 +311,7 @@ fun NotificationScreen(
                         // Section header if applicable
                         sectionHeaders[notif.id]?.let { headerTitle ->
                             item(
-                                key         = "header-$headerTitle",
+                                key = "header-$headerTitle",
                                 contentType = "header",
                             ) {
                                 DateHeader(title = headerTitle)
@@ -319,7 +319,7 @@ fun NotificationScreen(
                         }
                         // Notification item
                         item(
-                            key         = notif.id,
+                            key = notif.id,
                             contentType = notif.type.name,  // reuse composable slots by type
                         ) {
                             AnimatedNotifItem(
@@ -336,13 +336,12 @@ fun NotificationScreen(
                             )
                         }
                     }
+                    item(key = "bottom-spacer") { Spacer(Modifier.height(40.dp)) }
                 }
             }
         }
     }
 }
-
-// ── Top Bar ───────────────────────────────────────────────────────────────────
 
 @Composable
 private fun NotifTopBar(
@@ -356,7 +355,8 @@ private fun NotifTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(InkTheme.colors.bgDeep)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp)
+
     ) {
         // Back
         Box(
@@ -368,14 +368,15 @@ private fun NotifTopBar(
                 .border(0.5.dp, InkTheme.colors.bgBorder, RoundedCornerShape(10.dp))
                 .clickable(onClick = onBack),
         ) {
-            Icon(Icons.Rounded.ArrowBackIos, "Back", tint = InkTheme.colors.textSecondary, modifier = Modifier.size(15.dp).offset(x = 2.dp))
+            Icon(Icons.Rounded.ArrowBackIosNew, "Back", tint = InkTheme.colors.textSecondary, modifier = Modifier.size(15.dp).offset(x = 2.dp))
         }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+
         ) {
-            Text("Notifications", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = InkTheme.colors.textPrimary, letterSpacing = (-0.4).sp)
+            Text("Notifications", style = InkTheme.typography.titleMedium, color = InkTheme.colors.textPrimary, letterSpacing = (-0.4).sp)
             if (unreadCount > 0) {
                 AnimatedContent(
                     targetState = unreadCount,
