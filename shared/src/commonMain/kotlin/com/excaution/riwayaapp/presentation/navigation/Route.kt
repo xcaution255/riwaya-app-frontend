@@ -2,11 +2,6 @@ package com.excaution.riwayaapp.presentation.navigation
 
 import kotlinx.serialization.Serializable
 
-/**
- * Type-safe navigation routes (Navigation-Compose 2.8+ style).
- * Every screen is a @Serializable object/class instead of a raw string,
- * so typos and argument mismatches are caught at compile time.
- */
 sealed interface Route {
 
     @Serializable
@@ -29,7 +24,7 @@ sealed interface Route {
         data object VerifyEmail : Auth
 
         @Serializable
-        data object OtpVerify : Auth
+        data class OtpVerify(val email: String) : Auth
 
         @Serializable
         data object Splash : Auth

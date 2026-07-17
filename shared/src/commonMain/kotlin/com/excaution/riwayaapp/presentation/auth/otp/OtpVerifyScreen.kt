@@ -56,19 +56,23 @@ private const val OTP_LENGTH = 6
 
 @Composable
 fun OtpVerifyScreen(
-    emailHint: String,
+    email: String,
     onBack: () -> Unit,
     onVerified: () -> Unit,
 ) {
 
     val viewModel: OtpVerifyViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
-    var otpValue  by remember { mutableStateOf("") }
     var hasError  by remember { mutableStateOf(false) }
     var timerSecs by remember { mutableIntStateOf(42) }
-    var isVerifying by remember { mutableStateOf(false) }
-
+    var isVerifying = uiState.isLoading
     val focusRequester = remember { FocusRequester() }
+    var visible by remember { mutableStateOf(false) }
+
+    // Seed the email into your ViewModel state as soon as the screen is composed
+    LaunchedEffect(email) {
+        viewModel.initEmail(email)
+    }
 
     // Countdown timer
     LaunchedEffect(timerSecs) {
@@ -78,22 +82,27 @@ fun OtpVerifyScreen(
         }
     }
 
+
     // Auto-verify when 6 digits entered
     LaunchedEffect(uiState.otp) {
         if (uiState.otp.length == OTP_LENGTH) {
             hasError  = false
+            // Triggers the network request automatically
             isVerifying = true
-            delay(800)
-            viewModel.events.collect { event ->
-                when (event) {
-                    OtpVerifyEvent.NavigateToHome(uiState.email) -> {onVerified()}
-                    else -> {}
-                }
-            }
+            viewModel.verifyEmailOtp()
         }
     }
 
-    var visible by remember { mutableStateOf(false) }
+    // Collect events to navigate home
+    LaunchedEffect(Unit) {
+        visible = true
+        viewModel.events.collect { event ->
+            when (event) {
+                OtpVerifyEvent.NavigateToHome -> onVerified()
+            }
+        } //later show verify message and tell user to go login
+    }
+
     LaunchedEffect(Unit) {
         visible = true
         delay(400)
@@ -129,7 +138,7 @@ fun OtpVerifyScreen(
             title = "Enter OTP",
             subtitle = buildAnnotatedString {
                 append("Sent to ")
-                withStyle(SpanStyle(color = InkTheme.colors.genreSciFi, fontWeight = FontWeight.Bold)) { append(emailHint) }
+                withStyle(SpanStyle(color = InkTheme.colors.genreSciFi, fontWeight = FontWeight.Bold)) { append(email) }
             }.toString(),
             tagColor = InkTheme.colors.genreSciFi,
             centered = true,
@@ -198,7 +207,6 @@ fun OtpVerifyScreen(
                     onClick   = {
                         if (uiState.otp.length < OTP_LENGTH) hasError = true
                         else {
-                            viewModel.verifyEmailOtp()
                             isVerifying = true;
                         }
                     },
@@ -243,10 +251,10 @@ fun OtpVerifyScreen(
             }
         }
         Spacer(Modifier.height(24.dp))
+        uiState.errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
 }
 
-// ── Single OTP digit box ──────────────────────────────────────────────────────
 
 @Composable
 private fun OtpDigitBox(

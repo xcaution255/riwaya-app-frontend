@@ -42,7 +42,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
-    onRegisterSuccess: () -> Unit,
+    onRegisterSuccess: (String) -> Unit, //pass email to verify otp
 ) {
     val viewModel: RegisterViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -64,19 +64,19 @@ fun RegisterScreen(
         visible = true
         viewModel.events.collect { event ->
             when (event) {
-                RegisterEvent.NavigateToVerifyEmail(uiState.email) -> {onRegisterSuccess()}
-                else -> {}
+                is RegisterEvent.NavigateToVerifyEmail -> {
+                    onRegisterSuccess(event.email) // Pass the email through the lambda
+                }
             }
         }
     }
 
     AuthScaffold {
-
         // Header
         AnimatedVisibility(visible = visible, enter = fadeIn(tween(320, 50)) + slideInVertically(tween(320, 50)) { 20 }) {
             AuthHeader(
-                tag      = "",
-                title    = "Join RiwayaApp",
+                tag = "",
+                title = "Join RiwayaApp",
                 subtitle = "Explore books, share, and comment from stories",
             )
         }

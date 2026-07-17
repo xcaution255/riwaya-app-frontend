@@ -1,12 +1,10 @@
 package com.excaution.riwayaapp.presentation.navigation
 
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.excaution.riwayaapp.data.auth.AuthRepository
+import androidx.navigation.toRoute
 import com.excaution.riwayaapp.presentation.auth.emailverify.VerifyEmailScreen
 import com.excaution.riwayaapp.presentation.auth.login.LoginScreen
 import com.excaution.riwayaapp.presentation.auth.otp.OtpVerifyScreen
@@ -14,7 +12,6 @@ import com.excaution.riwayaapp.presentation.auth.passwordrecovery.ForgotPassword
 import com.excaution.riwayaapp.presentation.auth.passwordrecovery.PasswordRecoveryScreen
 import com.excaution.riwayaapp.presentation.auth.register.RegisterScreen
 import com.excaution.riwayaapp.presentation.auth.splash.SplashScreen
-import org.koin.compose.koinInject
 
 fun NavGraphBuilder.authGraph(navController: NavHostController) {
     navigation<Route.AuthGraph>(startDestination = Route.Auth.Splash) {
@@ -40,8 +37,6 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
             popExitTransition = NavAnimations.popExitSlideOut,
         ) {
             LoginScreen(
-                // Session.login() flips the single source of truth;
-                // RootNavGraph reacts to it and swaps graphs safely.
                 onLoginSuccess = { navController.navigate(Route.Auth.MainScreen) },
                 onNavigateToRegister = { navController.navigate(Route.Auth.Register) },
                 onNavigateToForgotPassword = { navController.navigate(Route.Auth.ForgotPassword) },
@@ -55,7 +50,9 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
             popExitTransition = NavAnimations.popExitSlideOut,
         ) {
             RegisterScreen(
-                onRegisterSuccess = {navController.navigate(Route.Auth.OtpVerify)},
+                onRegisterSuccess = {email ->
+                    //received email value straight to your type-safe route object
+                    navController.navigate(Route.Auth.OtpVerify(email)) },
                 onNavigateToLogin = {navController.navigate(Route.Auth.Login)},
             )
         }
@@ -78,11 +75,13 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
             exitTransition = NavAnimations.exitSlideOut,
             popEnterTransition = NavAnimations.popEnterSlideIn,
             popExitTransition = NavAnimations.popExitSlideOut,
-        ) {
+        ) {backStackEntry ->
+            // Type-safely extract the arguments from the route instance
+            val otpRoute = backStackEntry.toRoute<Route.Auth.OtpVerify>()
             OtpVerifyScreen(
                 onBack = { navController.navigate(Route.Auth.Login) },
-                emailHint = "",
-                onVerified = { navController.navigate(Route.Auth.MainScreen) }
+                email = otpRoute.email, // Use the extracted email string here
+                onVerified = { navController.navigate(Route.Auth.Login) }
             )
         }
 

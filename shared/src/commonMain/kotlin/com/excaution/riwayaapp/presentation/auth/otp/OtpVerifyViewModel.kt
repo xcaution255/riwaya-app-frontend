@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.excaution.riwayaapp.core.network.ApiResult
 import com.excaution.riwayaapp.data.auth.AuthRepository
+import com.excaution.riwayaapp.data.auth.VerifyOtpResponse
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,11 +15,11 @@ data class OtpVerifyUiState(
     val email: String = "",
     val otp: String = "",
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: String? = null
 )
 
 sealed class OtpVerifyEvent {
-    data class NavigateToHome(val email: String) : OtpVerifyEvent()
+    data object NavigateToHome : OtpVerifyEvent()
 }
 
 class OtpVerifyViewModel(private val repository: AuthRepository) : ViewModel() {
@@ -31,6 +32,11 @@ class OtpVerifyViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _events = Channel<OtpVerifyEvent>()
     val events = _events.receiveAsFlow()
 
+    // fun to set the email when the screen loads
+    fun initEmail(email: String) {
+        _uiState.update { it.copy(email = email) }
+    }
+
 
     fun verifyEmailOtp(){
         val state = _uiState.value
@@ -39,7 +45,18 @@ class OtpVerifyViewModel(private val repository: AuthRepository) : ViewModel() {
             when (val result = repository.verifyEmailOtp(state.email, state.otp)) {
                 is ApiResult.Success -> {
                     _uiState.update { it.copy(isLoading = false) }
-                    _events.send(OtpVerifyEvent.NavigateToHome(state.email))
+                    when (result) {
+                        ApiResult.Success(data = VerifyOtpResponse("verified")) -> {
+                            _events.send(OtpVerifyEvent.NavigateToHome)
+                        }
+                        ApiResult.Success(data = VerifyOtpResponse("Invalid")) -> {
+                            _uiState.update { it.copy(errorMessage = "Invalid OTP") }
+                        }
+                        else -> {
+                            _uiState.update { it.copy(errorMessage = "Unknown error") }
+                        }
+                    }
+
                 }
                 is ApiResult.Error -> _uiState.update {
                     it.copy(isLoading = false, errorMessage = result.message)
