@@ -2,7 +2,7 @@ package com.excaution.riwayaapp.core.network
 
 import com.excaution.riwayaapp.core.storage.TokenStorage
 import com.excaution.riwayaapp.data.auth.RefreshRequest
-import com.excaution.riwayaapp.data.auth.TokenPairDto
+import com.excaution.riwayaapp.data.auth.RefreshResponse
 import com.excaution.riwayaapp.getPlatformName
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -54,6 +54,8 @@ fun buildHttpClient(
     // 4. Auth plugin — auto-attaches Bearer token, auto-refreshes on 401
     install(Auth) {
         bearer {
+            //Stops Ktor from saving old tokens in its internal memory loop
+            cacheTokens = false
             loadTokens {
                 val access = tokenStorage.getAccessToken()
                 val refresh = tokenStorage.getRefreshToken()
@@ -71,8 +73,11 @@ fun buildHttpClient(
                     null
                 }
             }
+
             // Only send the token to your own API, never to third parties
-            sendWithoutRequest { request -> request.url.host == "10.0.2.2:8080" }
+            sendWithoutRequest { request ->
+                request.url.host == "10.0.2.2" && request.url.port == 8080
+            }
         }
     }
 
@@ -83,10 +88,10 @@ fun buildHttpClient(
     }
 }
 
-suspend fun HttpClient.refreshAccessToken(refreshToken: String): TokenPairDto? = try {
+suspend fun HttpClient.refreshAccessToken(refreshToken: String): RefreshResponse? = try {
     post("/auth/refresh") {
         setBody(RefreshRequest(refreshToken))
-    }.body<TokenPairDto>()
+    }.body<RefreshResponse>()
 } catch (e: Exception) {
     null
 }

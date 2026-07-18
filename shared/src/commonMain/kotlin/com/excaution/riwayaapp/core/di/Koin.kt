@@ -7,6 +7,6 @@ fun initKoin() {
         modules(appModule)
         modules(networkModule)
         modules(authModule)
+        modules(profileModule)
     }
-
 }

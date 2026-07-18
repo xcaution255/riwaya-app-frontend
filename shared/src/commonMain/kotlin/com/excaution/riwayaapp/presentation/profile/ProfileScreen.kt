@@ -36,25 +36,8 @@ import com.excaution.riwayaapp.presentation.theme.GradientFeatured
 import com.excaution.riwayaapp.presentation.theme.InkTheme
 import com.excaution.riwayaapp.presentation.theme.LocalThemeController
 import kotlinx.coroutines.launch
-
-data class UserProfile(
-    val firstName: String  = "Augustino",
-    val lastName: String   = "J",
-    val username: String   = "@augustino",
-    val email: String      = "augustino@email.com",
-    val bio: String        = "Crafting worlds through words. Fantasy & Sci-Fi author. Writing \"The Last Starweaver\" series ✦",
-    val website: String    = "augustino.dev",
-    val memberSince: String = "Author since 2023",
-    val reads: String      = "142k",
-    val stories: Int       = 18,
-    val followers: String  = "4.2k",
-    val following: Int     = 389,
-    val isOnline: Boolean  = true,
-    val isPro: Boolean     = true,
-    val monthlyEarnings: String = "$1,240",
-    val subscriptionLabel: String = "Pro Writer · Renews Jan 1",
-    val appVersion: String = "2.4.1",
-)
+import org.koin.compose.viewmodel.koinViewModel
+import riwayaapp.shared.generated.resources.Res
 
 sealed interface ProfileMenuItem {
     data class Navigable(
@@ -79,130 +62,146 @@ sealed interface ProfileMenuItem {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    profile: UserProfile = UserProfile(),
-    onNavigateToNotifications: () -> Unit = {},
-    onNavigateToStories: () -> Unit = {},
-    onNavigateToEarnings: () -> Unit = {},
-    onLogout: () -> Unit = {},
+    onLogout: () -> Unit = {}
 ) {
-    val sheetState   = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope        = rememberCoroutineScope()
-    var showSheet    by remember { mutableStateOf(false) }
-    var currentProfile by remember { mutableStateOf(profile) }
-
-    // 1. Setup the Scroll Behavior for the Top Bar (EnterAlways = hides on downscroll, shows on upscroll)
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
-    // Key perf trick: give LazyColumn its own stable state
+    val viewModel: ProfileViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    var showSheet by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
 
-    Scaffold(
-    )  { padding ->
-        LazyColumn(
-            state = listState,
-            contentPadding = PaddingValues(
-                bottom = padding.calculateBottomPadding() + 8.dp,
-            ),
-            // Perf: tell compose items won't change size
+    LaunchedEffect(Unit) {
+        viewModel.getProfile()
+    }
+
+    Scaffold { padding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(InkTheme.colors.bgDeep),
+            contentAlignment = Alignment.Center
         ) {
-            item(key = "header") {
-                ProfileHero(
-                    profile = currentProfile,
-                    onEditClick = {
-                        showSheet = true
-                        scope.launch { sheetState.show() }
-                    },
-                )
-                Spacer(Modifier.height(8.dp))
-            }
+            when (val state = uiState) {
+                is ProfileUiState.Loading -> {
+                    CircularProgressIndicator(color = InkTheme.colors.accentPrimary)
+                }
 
-            // Stats row
-            item(key = "stats") {
-                ProfileStats(profile = currentProfile)
-                Spacer(Modifier.height(8.dp))
-            }
-
-            // Account section
-            item(key = "section-account") {
-                SectionLabel("Account")
-            }
-            item(key = "group-account") {
-                MenuGroup(
-                    items = buildAccountItems(
-                        profile = currentProfile,
-                        onStories = onNavigateToStories,
-                        onEarnings = onNavigateToEarnings
+                is ProfileUiState.Error -> {
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp)
                     )
-                )
-                Spacer(Modifier.height(8.dp))
+                }
+
+                is ProfileUiState.Success -> {
+                    val currentProfile = state.data
+                    LazyColumn(
+                        state = listState,
+                        contentPadding = PaddingValues(
+                            bottom = padding.calculateBottomPadding() + 8.dp,
+                        ),
+                        // Perf: tell compose items won't change size
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(InkTheme.colors.bgDeep),
+                    ) {
+                        item(key = "header") {
+                            ProfileHero(
+                                onEditClick = {
+                                    showSheet = true
+                                    scope.launch { sheetState.show() }
+                                },
+                                username = currentProfile.userName,
+                                memberSince = viewModel.formatDate(currentProfile.createdAt.toString()),
+                                bio = currentProfile.bio ?: ""
+                            )
+                            Spacer(Modifier.height(8.dp))
+                        }
+
+                        // Account section
+                        item(key = "section-account") {
+                            SectionLabel("Account")
+                        }
+                        item(key = "group-account") {
+                            MenuGroup(
+                                items = buildAccountItems(
+                                    email = currentProfile.email
+                                )
+                            )
+                            Spacer(Modifier.height(8.dp))
+                        }
+
+                        // Preferences section
+                        item(key = "section-prefs") { SectionLabel("Preferences") }
+                        item(key = "group-prefs") {
+                            MenuGroup(items = buildPrefItems())
+                            Spacer(Modifier.height(8.dp))
+                        }
+
+                        // Support & Legal section
+                        item(key = "section-support") { SectionLabel("Support & Legal") }
+                        item(key = "group-support") {
+                            MenuGroup(items = buildSupportItems())
+                            Spacer(Modifier.height(16.dp))
+                        }
+
+                        // Sign out
+                        item(key = "signout") {
+                            SignOutButton(onClick = onLogout)
+                            Spacer(Modifier.height(8.dp))
+                        }
+
+                        item(key = "bottom-spacer") { Spacer(Modifier.height(40.dp)) }
+                    }
+
+                    // Edit Profile Bottom Sheet
+                    if (showSheet) {
+                        ModalBottomSheet(
+                            onDismissRequest = { showSheet = false },
+                            sheetState = sheetState,
+                            containerColor = InkTheme.colors.bgSurface,
+                            dragHandle = {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(top = 10.dp, bottom = 4.dp)
+                                        .width(36.dp)
+                                        .height(4.dp)
+                                        .clip(CircleShape)
+                                        .background(InkTheme.colors.bgBorder),
+                                )
+                            },
+                            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                        ) {
+                            EditProfileSheet(
+                                onSave = { username, bio ->
+                                    viewModel.updateProfile(username, bio)
+                                    scope.launch { sheetState.hide() }
+                                    showSheet = false
+                                },
+                                onDismiss = {
+                                    scope.launch { sheetState.hide() }
+                                    showSheet = false
+                                },
+                                username = currentProfile.userName,
+                                bio = currentProfile.bio ?: "",
+                            )
+                        }
+                    }
+                }
+                else -> {}
             }
-
-            // Preferences section
-            item(key = "section-prefs") { SectionLabel("Preferences") }
-            item(key = "group-prefs") {
-                MenuGroup(items = buildPrefItems())
-                Spacer(Modifier.height(8.dp))
-            }
-
-            // Support & Legal section
-            item(key = "section-support") { SectionLabel("Support & Legal") }
-            item(key = "group-support") {
-                MenuGroup(items = buildSupportItems())
-                Spacer(Modifier.height(16.dp))
-            }
-
-            // Sign out
-            item(key = "signout") {
-                SignOutButton(onClick = onLogout)
-                Spacer(Modifier.height(8.dp))
-            }
-
-            item(key = "bottom-spacer") { Spacer(Modifier.height(40.dp)) }
-        }
-    }
-
-    // Edit Profile Bottom Sheet
-    if (showSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showSheet = false },
-            sheetState = sheetState,
-            containerColor = InkTheme.colors.bgSurface,
-            dragHandle = {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 10.dp, bottom = 4.dp)
-                        .width(36.dp)
-                        .height(4.dp)
-                        .clip(CircleShape)
-                        .background(InkTheme.colors.bgBorder),
-                )
-            },
-            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        ) {
-            EditProfileSheet(
-                profile   = currentProfile,
-                onSave    = { updated ->
-                    currentProfile = updated
-                    scope.launch { sheetState.hide() }
-                    showSheet = false
-                },
-                onDismiss = {
-                    scope.launch { sheetState.hide() }
-                    showSheet = false
-                },
-            )
         }
     }
 }
 
-// ── Hero profile──────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun ProfileHero(
-    profile: UserProfile,
+    username: String,
+    memberSince: String,
+    bio: String,
     onEditClick: () -> Unit,
 ) {
     Column {
@@ -274,13 +273,12 @@ private fun ProfileHero(
                         .border(3.dp, InkTheme.colors.bgDeep, CircleShape),
                 ) {
                     Text(
-                        text = profile.firstName.first().uppercase(),
+                        text = username.first().uppercase(),
                         style = InkTheme.typography.headlineMedium,
                         color = Color.White,
                     )
                 }
                 // Online dot
-                if (profile.isOnline) {
                     Box(
                         modifier = Modifier
                             .size(16.dp)
@@ -288,19 +286,17 @@ private fun ProfileHero(
                             .clip(CircleShape)
                             .background(InkTheme.colors.successGreen)
                             .border(2.5.dp, InkTheme.colors. bgDeep, CircleShape),
-                    )
-                }
-            }
+                    ) }
 
             Spacer(Modifier.height(10.dp))
             Text(
-                text = "${profile.username} · ${profile.memberSince}",
+                text = "$username · since $memberSince",
                 style = InkTheme.typography.titleMedium,
                 color = InkTheme.colors.textMuted,
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = profile.bio,
+                text = bio,
                 style = InkTheme.typography.bodyMedium,
                 color = InkTheme.colors.textSecondary,
                 textAlign = TextAlign.Center,
@@ -334,57 +330,6 @@ private fun ProfileHero(
         }
     }
 }
-
-// ── Stats ─────────────────────────────────────────────────────────────────────
-
-@Composable
-private fun ProfileStats(profile: UserProfile) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(InkTheme.colors.bgSurface)
-            .border(0.5.dp, InkTheme.colors.bgBorder, RoundedCornerShape(12.dp)),
-    ) {
-        listOf(
-            profile.reads          to "Reads",
-            profile.stories.toString() to "Stories",
-            profile.followers      to "Followers",
-            profile.following.toString() to "Following",
-        ).forEachIndexed { index, (value, label) ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .weight(1f)
-                    .then(
-                        if (index > 0) Modifier.border(
-                            width = 0.5.dp,
-                            color = InkTheme.colors.bgBorder,
-                            shape = RoundedCornerShape(0.dp),
-                        ) else Modifier
-                    )
-                    .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) { }
-                    .padding(vertical = 10.dp),
-            ) {
-                Text(
-                    text = value,
-                    style = InkTheme.typography.titleLarge,
-                    color = InkTheme.colors.textPrimary
-                )
-                Text(
-                    text = label,
-                    style = InkTheme.typography.bodySmall,
-                    color = InkTheme.colors.textMuted,
-                    letterSpacing = 0.4.sp,
-                )
-            }
-        }
-    }
-}
-
-// ── Menu ──────────────────────────────────────────────────────────────────────
-
 @Composable
 private fun SectionLabel(title: String) {
     Text(
@@ -544,7 +489,6 @@ private fun ToggleItem(
     }
 }
 
-// ── Sign Out ──────────────────────────────────────────────────────────────────
 
 @Composable
 private fun SignOutButton(onClick: () -> Unit) {
@@ -580,13 +524,13 @@ private fun SignOutButton(onClick: () -> Unit) {
 
 @Composable
 private fun EditProfileSheet(
-    profile: UserProfile,
-    onSave: (UserProfile) -> Unit,
+    username: String,
+    bio: String,
+    onSave: (String, String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var username  by remember { mutableStateOf(profile.username) }
-    var bio       by remember { mutableStateOf(profile.bio) }
-    var website   by remember { mutableStateOf(profile.website) }
+    var username  by remember { mutableStateOf(username) }
+    var bio       by remember { mutableStateOf(bio) }
 
     // Perf: sheet content is in its own scroll, separate from screen LazyColumn
     Column(
@@ -663,7 +607,6 @@ private fun EditProfileSheet(
         ) {
             SheetField(label = "Username", value = username, onValueChange = { username = it })
             SheetField(label = "Bio", value = bio, onValueChange = { bio = it }, minLines = 2, maxLines = 4)
-            SheetField(label = "Website", value = website, onValueChange = { website = it })
         }
 
         Spacer(Modifier.height(20.dp))
@@ -672,13 +615,7 @@ private fun EditProfileSheet(
         GradientButton(
             text     = "Save changes",
             onClick  = {
-                onSave(
-                    profile.copy(
-                        username  = username,
-                        bio       = bio,
-                        website   = website,
-                    )
-                )
+                onSave(username, bio)
             },
             icon     = Icons.Rounded.Check,
             modifier = Modifier.padding(horizontal = 16.dp),
@@ -738,46 +675,17 @@ private fun SheetField(
     }
 }
 
-// ── Menu Builder helpers ──────────────────────────────────────────────────────
-
 @Composable
 private fun buildAccountItems(
-    profile: UserProfile,
-    onStories: () -> Unit,
-    onEarnings: () -> Unit,
+    email: String,
 ) = listOf(
     ProfileMenuItem.Navigable(
-        title    = "Personal info",
-        subtitle = profile.email,
-        icon     = Icons.Rounded.Person,
+        title    = "E-mail",
+        subtitle = email,
+        icon     = Icons.Rounded.Mail,
         iconBg   = InkTheme.colors.accentPrimary.copy(alpha = 0.12f),
         iconTint = InkTheme.colors.accentPrimary,
-    ),
-    ProfileMenuItem.Navigable(
-        title    = "My stories",
-        subtitle = "${profile.stories} published · 3 drafts",
-        icon     = Icons.Rounded.Book,
-        iconBg   = InkTheme.colors.genreSciFi.copy(alpha = 0.12f),
-        iconTint = InkTheme.colors.genreSciFi,
-        badge    = "3 drafts",
-        onClick  = onStories,
-    ),
-    ProfileMenuItem.Navigable(
-        title    = "Earnings",
-        subtitle = "${profile.monthlyEarnings} this month",
-        icon     = Icons.Rounded.AttachMoney,
-        iconBg   = InkTheme.colors.successGreen.copy(alpha = 0.12f),
-        iconTint = InkTheme.colors.successGreen,
-        onClick  = onEarnings,
-    ),
-    ProfileMenuItem.Navigable(
-        title    = "Subscription",
-        subtitle = profile.subscriptionLabel,
-        icon     = Icons.Rounded.Workspaces,
-        iconBg   = InkTheme.colors.starColor.copy(alpha = 0.12f),
-        iconTint = InkTheme.colors.starColor,
-        badge    = if (profile.isPro) "PRO" else null,
-    ),
+    )
 )
 
 @Composable
@@ -836,18 +744,9 @@ private fun buildSupportItems() = listOf(
     ),
     ProfileMenuItem.Navigable(
         title    = "About RiwayaApp",
-        subtitle = "Version 2.4.1",
+        subtitle = "Version 1.0.0",
         icon     = Icons.Rounded.Info,
         iconBg   = InkTheme.colors.genreSciFi.copy(alpha = 0.12f),
         iconTint = InkTheme.colors.genreSciFi,
     ),
 )
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ProfileHeroPrev() {
-    ProfileHero(
-        profile = UserProfile(),
-        onEditClick = {}
-    )
-}

@@ -23,6 +23,6 @@ import kotlinx.serialization.Serializable
 @Serializable data class ResetPasswordResponse(val message: String)
 
 @Serializable data class RefreshRequest(val refreshToken: String)
-@Serializable data class TokenPairDto(val accessToken: String, val refreshToken: String)
+@Serializable data class RefreshResponse(val accessToken: String, val refreshToken: String)
 
 @Serializable data class MessageResponse(val message: String)

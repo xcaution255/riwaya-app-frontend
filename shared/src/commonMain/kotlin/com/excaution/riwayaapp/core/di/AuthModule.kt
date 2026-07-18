@@ -12,7 +12,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val authModule = module {
-    single { AuthApi(get()) }
+    single { AuthApi(get(), get()) }
     single { AuthRepository(get(), get()) }
 
     viewModel { RegisterViewModel(get()) }

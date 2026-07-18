@@ -8,10 +8,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -31,33 +38,39 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MainScreen() {
-    val bottomVM : BottomViewModel = koinViewModel()
-    val bottomState by bottomVM.uiState.collectAsState()
-
     var selectedTab by remember { mutableIntStateOf(0) }
-
     val navController = rememberNavController()
-    val backStackEntry by navController.currentBackStackEntryAsState()
     val authRepository: AuthRepository = koinInject()
+
+    // Tracks total bar height dynamically (including system padding)
+    var bottomBarHeightPx by remember { mutableStateOf(0f) }
+    // Tracks translation Y offset
+    var bottomBarOffsetHeightPx by remember { mutableStateOf(0f) }
+    // Intercept scroll deltas from any child scrollable list
+    val nestedScrollConnection = remember(bottomBarHeightPx) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
+                val newOffset = bottomBarOffsetHeightPx + delta
+
+                // Keep offset restricted between 0 (visible) and negative height (hidden)
+                if (bottomBarHeightPx > 0f) {
+                    bottomBarOffsetHeightPx = newOffset.coerceIn(-bottomBarHeightPx, 0f)
+                }
+
+                return Offset.Zero
+            }
+        }
+    }
     
     Scaffold(
         containerColor = InkTheme.colors.bgDeep,
-//        bottomBar = {
-////            FloatingBottomBar(
-////                selectedIndex = bottomState.selectedBottomIndex,
-////                onItemSelected = bottomVM::selectBottom,
-////                onSearchClick = {navController.navigate(Route.Main.Search)},
-////                modifier = Modifier,
-////                onHomeClick = {navController.navigate(Route.Main.Home) },
-////                onBookShopClick = {navController.navigate(Route.Main.BookShop)},
-////                onSavedClick = {navController.navigate(Route.Main.Saved)},
-////                onProfileClick = {navController.navigate(Route.Main.Profile)}
-////            )
-//            //PhotosScreenExample()
-//        }
     ) { innerPadding ->
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(nestedScrollConnection)) {
             NavHost(
                 navController = navController,
                 startDestination = Route.Main.Home,
@@ -112,7 +125,15 @@ fun MainScreen() {
                 selectedIndex = selectedTab,
                 onItemSelected = { selectedTab = it },
                 onSearchClick = { navController.navigate(Route.Main.Search) },
-                modifier = Modifier.align(Alignment.BottomCenter),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .onGloballyPositioned { coordinates ->
+                        bottomBarHeightPx = coordinates.size.height.toFloat()
+                    }
+                    .graphicsLayer {
+                        // Pulls the bar downwards relative to its height bounds
+                        translationY = -bottomBarOffsetHeightPx
+                    },
                 onHomeClick = {navController.navigate(Route.Main.Home) },
                 onBooksClick = {navController.navigate(Route.Main.BookShop)},
                 onSavedClick = {navController.navigate(Route.Main.Saved)},

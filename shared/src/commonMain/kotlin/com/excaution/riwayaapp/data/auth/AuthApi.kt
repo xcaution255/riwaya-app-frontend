@@ -2,12 +2,15 @@ package com.excaution.riwayaapp.data.auth
 
 import com.excaution.riwayaapp.core.network.ApiResult
 import com.excaution.riwayaapp.core.network.safeApiCall
+import com.excaution.riwayaapp.core.storage.TokenStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 
-class AuthApi(private val client: HttpClient) {
+class AuthApi(
+    private val client: HttpClient,
+    private val tokenStorage: TokenStorage) {
 
     suspend fun register(email: String, password: String, name: String): ApiResult<RegisterResponse> =
         safeApiCall {
