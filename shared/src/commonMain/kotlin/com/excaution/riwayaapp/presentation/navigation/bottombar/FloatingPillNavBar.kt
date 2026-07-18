@@ -74,7 +74,7 @@ fun FloatingPillNavBar(
     ) {
         Surface(
             shape = RoundedCornerShape(50),
-            color = InkTheme.colors.bgDeep,
+            color =  InkTheme.colors.bgCard,//deep
             shadowElevation = 6.dp,
             tonalElevation = 3.dp
         ) {
@@ -130,14 +130,18 @@ private fun PillNavItemView(
     onClick: () -> Unit
 ) {
     val background = if (selected) {
-        MaterialTheme.colorScheme.primaryContainer
+        //MaterialTheme.colorScheme.primaryContainer
+        InkTheme.colors.accentPrimary
     } else {
-        MaterialTheme.colorScheme.surfaceContainerHigh
+        //MaterialTheme.colorScheme.surfaceContainerHigh
+        Color.Transparent
     }
     val contentColor = if (selected) {
-        MaterialTheme.colorScheme.onPrimaryContainer
+        //MaterialTheme.colorScheme.onPrimaryContainer
+        Color.White
     } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
+        //MaterialTheme.colorScheme.onSurfaceVariant
+        InkTheme.colors.textSecondary
     }
 
     Row(
