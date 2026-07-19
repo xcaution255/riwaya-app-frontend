@@ -13,7 +13,6 @@ import com.excaution.riwayaapp.presentation.theme.GradientMystery
 import com.excaution.riwayaapp.presentation.theme.GradientRomance
 import com.excaution.riwayaapp.presentation.theme.GradientSciFi
 
-
 enum class StoryGenreFeed(val label: String, val color: Color, val bgAlpha: Float) {
     ALL      ("All", AccentPrimary, 0.12f),
     STORIES  ("Stories",   Color(0xFFA78BFA), 0.12f),
@@ -47,7 +46,7 @@ data class StoryFeedItem(
     val isSaved: Boolean = false,
 )
 
-// ── Story ─────────────────────────────────────────────────────────────────────
+// Story
 
 data class Story(
     val id: Int,
@@ -74,7 +73,7 @@ enum class StoryGenre(val label: String, val color: Color) {
     ADVENTURE("Adventure",Color(0xFFF472B6)),
 }
 
-// ── Book ──────────────────────────────────────────────────────────────────────
+// Book
 
 data class Book(
     val id: Int,
@@ -96,7 +95,7 @@ data class Book(
         }
 }
 
-// ── Sample Data ───────────────────────────────────────────────────────────────
+// Sample Data
 
 object SampleData {
 

@@ -149,8 +149,7 @@ fun CommentsSheet(
     }
 }
 
-// ── Sheet content ─────────────────────────────────────────────────────────────
-
+// Sheet content
 @Composable
 fun CommentsContent(
     totalComments: Int = 4821,
@@ -526,7 +525,7 @@ private fun ReactionPill(emoji: String, count: Int) {
     }
 }
 
-// ── Like button with heart animation ─────────────────────────────────────────
+// Like button with heart animation
 
 @Composable
 private fun LikeButton(count: Int, isLiked: Boolean, onClick: () -> Unit) {

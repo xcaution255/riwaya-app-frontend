@@ -17,12 +17,35 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.request
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 private const val BASE_URL = "http://10.0.2.2:8080"
+
+// 1. Create a lightweight, raw client purely for refreshing tokens.
+// This client has NO Auth plugin installed, completely avoiding threading deadlocks.
+private val standaloneRefreshClient = HttpClient {
+    install(ContentNegotiation) {
+        json(Json { ignoreUnknownKeys = true })
+    }
+    defaultRequest {
+        url(BASE_URL)
+        contentType(ContentType.Application.Json)
+    }
+}
+
+// 3. Isolated extension function mapped to the standalone client engine context
+suspend fun HttpClient.executeRefreshCall(refreshToken: String): RefreshResponse? = try {
+    post("/auth/refresh") {
+        setBody(RefreshRequest(refreshToken))
+    }.body<RefreshResponse>()
+} catch (e: Exception) {
+    null
+}
 
 fun buildHttpClient(
     engineClient: HttpClient,
@@ -41,9 +64,9 @@ fun buildHttpClient(
 
     // 2. Timeouts — never let a request hang forever
     install(HttpTimeout) {
-        requestTimeoutMillis = 30_000
-        connectTimeoutMillis = 30_000
-        socketTimeoutMillis = 30_000
+        requestTimeoutMillis = 15_000
+        connectTimeoutMillis = 15_000
+        socketTimeoutMillis = 15_000
     }
 
     // 3. Logging — strip in release builds (see note below)
@@ -62,14 +85,22 @@ fun buildHttpClient(
                 if (access != null) BearerTokens(access, refresh.orEmpty()) else null
             }
             refreshTokens {
-                // called automatically by Ktor when a request gets 401
+                // CIRCUIT BREAKER: Break the loop if the refresh endpoint itself fails
+                if (response.request.url.encodedPath.contains("/auth/refresh")) {
+                    tokenStorage.clearTokens()
+                    return@refreshTokens null
+                }
+
                 val refreshToken = tokenStorage.getRefreshToken() ?: return@refreshTokens null
-                val newTokens = client.refreshAccessToken(refreshToken) // plain, unauthenticated call
+
+                // 2. FIX: Call our standalone client to execute the token swap safely!
+                val newTokens = standaloneRefreshClient.executeRefreshCall(refreshToken)
+
                 if (newTokens != null) {
                     tokenStorage.saveTokens(newTokens.accessToken, newTokens.refreshToken)
                     BearerTokens(newTokens.accessToken, newTokens.refreshToken)
                 } else {
-                    tokenStorage.clearTokens() // refresh failed -> force logout upstream
+                    tokenStorage.clearTokens()
                     null
                 }
             }
@@ -88,8 +119,11 @@ fun buildHttpClient(
     }
 }
 
+// REFRESH CALL: Explicitly removes old, expired authorization headers
 suspend fun HttpClient.refreshAccessToken(refreshToken: String): RefreshResponse? = try {
     post("/auth/refresh") {
+        // Remove the inherited expired Authorization header completely
+        headers.remove(HttpHeaders.Authorization)
         setBody(RefreshRequest(refreshToken))
     }.body<RefreshResponse>()
 } catch (e: Exception) {

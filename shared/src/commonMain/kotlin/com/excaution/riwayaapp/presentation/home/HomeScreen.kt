@@ -64,12 +64,10 @@ import kotlinx.coroutines.launch
 fun HomeScreen(onNotificationClick: () -> Unit) {
     // 1. Setup the Scroll Behavior for the Top Bar (EnterAlways = hides on downscroll, shows on upscroll)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
     val listState = rememberLazyListState()
     var showSheet    by remember { mutableStateOf(false) }
     val sheetState   = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
-
 
     //for chips
     var selectedGenre by remember { mutableStateOf(StoryGenreFeed.ALL) }
