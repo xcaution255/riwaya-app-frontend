@@ -26,12 +26,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.getValue
@@ -42,8 +45,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,14 +57,15 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import com.excaution.riwayaapp.domain.model.SampleData.storyFeed
 import com.excaution.riwayaapp.domain.model.StoryGenreFeed
 import com.excaution.riwayaapp.presentation.components.SurfaceIconButton
 import com.excaution.riwayaapp.presentation.theme.GradientAccent
 import com.excaution.riwayaapp.presentation.theme.InkTheme
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 
 
+@Suppress("FrequentlyChangingValue")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(onNotificationClick: () -> Unit) {
@@ -69,12 +76,19 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
     val sheetState   = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
+    val viewModel : PostViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsState()
+    // 1. Collect the pagination state at the top of HomeScreen
+    val isPaginationLoading by viewModel.isPaginationLoading.collectAsState()
+    // 1. Calculate the active refreshing state on the fly based on current UI flags
+    val isRefreshing = uiState is PostUiState.Loading && listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
+
+
+    LaunchedEffect(Unit) {
+        viewModel.loadNextPage()
+    }
     //for chips
     var selectedGenre by remember { mutableStateOf(StoryGenreFeed.ALL) }
-    val filteredStories = remember(selectedGenre) {
-        if (selectedGenre == StoryGenreFeed.ALL) storyFeed
-        else storyFeed.filter { it.genre == selectedGenre }
-    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection), // Crucial: Connects scroll to TopBar
@@ -108,33 +122,106 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
             )
         }
     ) { innerPadding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 0.dp),
-            state = listState,
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding(), // Handles top bar dynamically
-                bottom = innerPadding.calculateBottomPadding()
-            )
+                .background(InkTheme.colors.bgDeep),
+            contentAlignment = Alignment.Center
         ) {
-            // When the TopAppBar hides, this layer slides up and locks perfectly at the very top.
-            stickyHeader {
-                CategoryChips(selected = selectedGenre, onSelect = { selectedGenre = it })
-            }
+            when(val state = uiState) {
+                is PostUiState.Idle -> {}
+                // Show the full screen loader indicator ONLY on the absolute first page load
+                is PostUiState.Loading -> {
+                    CircularProgressIndicator()
+                }
+                is PostUiState.FeedSuccess -> {
+                    // 1. Filter the live network data using the selected genre chip
+                    val liveFilteredPosts = remember(selectedGenre, state.pageData.content) {
+                        if (selectedGenre == StoryGenreFeed.ALL) {
+                            state.pageData.content
+                        } else {
+                            // Converts response genre to match your UI chip Enum if named exactly the same
+                            state.pageData.content.filter { it.genre.name == selectedGenre.name }
+                        }
+                    }
+                    // 2. Wrap your layout container here to monitor swipe refresh gestures
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh = {
+                            // Clears pagination counters and pulls a fresh page 0 branch
+                            viewModel.refreshFeed()
+                        }
+                    ){
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 0.dp),
+                        state = listState,
+                        contentPadding = PaddingValues(
+                            top = innerPadding.calculateTopPadding(), // Handles top bar dynamically
+                            bottom = innerPadding.calculateBottomPadding()
+                        )
+                    ) {
+                        // When the TopAppBar hides, this layer slides up and locks perfectly at the very top.
+                        // Sticky genre selector header
+                        stickyHeader {
+                            CategoryChips(
+                                selected = selectedGenre,
+                                onSelect = { selectedGenre = it })
+                        }
 
-           itemsIndexed(
-                items = filteredStories.filter { !it.isFeatured },
-                key   = { _, s -> s.id },
-            ) { index, item ->
-                StoryFeedCard(
-                    item = item,
-                    modifier = Modifier,
-                    onCommentsClick = {  showSheet = true
-                        scope.launch { sheetState.show() }}
-                )
-           }
-            item(key = "bottom-spacer") { Spacer(Modifier.height(40.dp)) }
+                        // 2. Loop through the real network data list instead of the mock list
+                        itemsIndexed(
+                            items = liveFilteredPosts,
+                            key = { _, post -> post.id.toString() } // Safe multiplatform UUID string conversion
+                        ) { index, postItem -> // 'postItem' represents a single PostResponse object
+
+                            // 2. Pagination Trigger Hook: If the user scrolls 4 items away from the bottom, pre-fetch next page!
+                            if (index >= liveFilteredPosts.lastIndex - 4) {
+                                viewModel.loadNextPage()
+                            }
+                            PostFeedCard(
+                                post = postItem, //  FIXED: Pass the individual item, not the whole list!
+                                modifier = Modifier,
+                                onCommentsClick = { clickedPost ->
+                                    // You can track which post comments to open here if needed
+                                    showSheet = true
+                                    scope.launch { sheetState.show() }
+                                }
+                            )
+                        }
+                        // 2. Append the bottom pagination indicator item conditionally
+                        if (isPaginationLoading) {
+                            item(key = "pagination-loader") {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 24.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(
+                                        color = InkTheme.colors.accentPrimary,
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
+                            }
+                        } else {
+                            // Fallback standard spacing item when not loading data
+                            item(key = "bottom-spacer") {
+                                Spacer(Modifier.height(40.dp))
+                            }
+                        }
+                    }
+                }
+                }
+                is PostUiState.Error -> {
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = Color.Red,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else -> {}
+            }
         }
     }
     if (showSheet) {

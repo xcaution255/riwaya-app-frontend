@@ -61,18 +61,7 @@ data class Story(
     val isFeatured: Boolean = false,
     val coverGradient: List<Color>,
     val coverEmoji: String,
-)
-
-enum class StoryGenre(val label: String, val color: Color) {
-    ALL      ("All", AccentPrimary),
-    FANTASY  ("Fantasy", GenreFantasy),
-    ROMANCE  ("Romance", GenreRomance),
-    MYSTERY  ("Mystery", GenreMystery),
-    SCIFI    ("Sci-Fi", GenreSciFi),
-    HORROR   ("Horror", GenreHorror),
-    ADVENTURE("Adventure",Color(0xFFF472B6)),
-}
-
+    )
 // Book
 
 data class Book(

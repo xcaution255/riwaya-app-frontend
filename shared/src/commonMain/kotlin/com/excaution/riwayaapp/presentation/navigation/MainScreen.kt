@@ -27,14 +27,13 @@ import com.excaution.riwayaapp.presentation.navigation.bottombar.FloatingPillNav
 import com.excaution.riwayaapp.data.auth.AuthRepository
 import com.excaution.riwayaapp.presentation.books.BookStoreScreen
 import com.excaution.riwayaapp.presentation.home.HomeScreen
-import com.excaution.riwayaapp.presentation.navigation.bottombar.BottomViewModel
 import com.excaution.riwayaapp.presentation.notifications.NotificationScreen
 import com.excaution.riwayaapp.presentation.profile.ProfileScreen
 import com.excaution.riwayaapp.presentation.saved.SavedScreen
 import com.excaution.riwayaapp.presentation.search.SearchScreen
 import com.excaution.riwayaapp.presentation.theme.InkTheme
 import org.koin.compose.koinInject
-import org.koin.compose.viewmodel.koinViewModel
+
 
 @Composable
 fun MainScreen() {

@@ -5,42 +5,43 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.excaution.riwayaapp.domain.model.SampleData.storyFeed
-import com.excaution.riwayaapp.domain.model.StoryFeedItem
-import com.excaution.riwayaapp.domain.model.StoryGenreFeed
+import com.excaution.riwayaapp.data.post.PostResponse
 import com.excaution.riwayaapp.format
 import com.excaution.riwayaapp.presentation.theme.InkTheme
+import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StoryFeedCard(
-    item: StoryFeedItem,
+fun PostFeedCard(
+    post: PostResponse,
     modifier: Modifier = Modifier,
-    onCommentsClick: (StoryFeedItem) -> Unit = {}
+    onCommentsClick: (PostResponse) -> Unit = {}
 ) {
+    val viewModel : PostViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsState()
+
     var isExpanded by remember { mutableStateOf(false) }
-    var liked      by remember { mutableStateOf(item.isLiked) }
-    var saved      by remember { mutableStateOf(item.isSaved) }
-    var likeCount  by remember { mutableLongStateOf(item.likeCount + if (item.isLiked) 1 else 0) }
+    var liked      by remember { mutableStateOf(post.likedByCurrentUser) }
+    var saved      by remember { mutableStateOf(post.savedByCurrentUser) }
+    var likeCount  by remember { mutableLongStateOf(post.likeCount + if (post.likedByCurrentUser) 1 else 0) }
+
 
     Column(
         modifier = modifier
@@ -50,21 +51,21 @@ fun StoryFeedCard(
     ) {
         Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp)) {
 
-            // ── Meta row: genre pill + live badge + author ────────────────────
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
-            ) {
-                // Genre pill
-                GenrePill(genre = item.genre)
-                Spacer(Modifier.weight(1f))
-                MetaChip(Icons.Rounded.Visibility, item.views)
-            }
+//            // ── Meta row: genre pill + live badge + author ────────────────────
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically,
+//                horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+//            ) {
+//                // Genre pill
+//                GenrePill(genre = post.genre)
+//                Spacer(Modifier.weight(1f))
+//                //MetaChip(Icons.Rounded.Visibility, item.views)
+//            }
 
             // ── Title ─────────────────────────────────────────────────────────
             Text(
-                text       = item.title,
+                text       = post.title,
                 style = InkTheme.typography.headlineMedium,
                 color      = InkTheme.colors.textPrimary,
                 modifier   = Modifier.padding(bottom = 7.dp),
@@ -76,12 +77,12 @@ fun StoryFeedCard(
                 transitionSpec = {
                     fadeIn(tween(260)) togetherWith fadeOut(tween(180))
                 },
-                label = "bodyExpand-${item.id}",
+                label = "bodyExpand-${post.id}",
             ) { expanded ->
                 if (expanded) {
                     // Full story body
                     Text(
-                        text = item.fullBody,
+                        text = post.content,
                         style = InkTheme.typography.bodyLarge,
                         color  = InkTheme.colors.textSecondary,
                         modifier = Modifier
@@ -92,7 +93,7 @@ fun StoryFeedCard(
                     Column {
                         Box {
                             Text(
-                                text       = item.previewBody,
+                                text       = post.content,//later take some words
                                 style = InkTheme.typography.bodyLarge,
                                 color      = InkTheme.colors.textSecondary,
                                 maxLines   = 3,
@@ -139,13 +140,13 @@ fun StoryFeedCard(
                     tint = if (liked) Color(0xFFE24B4A) else InkTheme.colors.textMuted,
                     modifier = Modifier,
                     onClick = {liked = !liked
-                        likeCount = item.likeCount + if (liked) 1 else 0}
+                        likeCount = post.likeCount + if (liked) 1 else 0}
                 )
                 EngageChip(
                     icon = Icons.Rounded.ChatBubbleOutline,
-                    label = item.commentCount,
+                    label = "123",//post.commentCount,
                     modifier = Modifier,
-                    onClick = {onCommentsClick(item)}
+                    onClick = {onCommentsClick(post)}
                 )
                 EngageChip(
                     icon = if (saved) Icons.Rounded.Bookmark else Icons.Rounded.BookmarkBorder,
@@ -156,7 +157,7 @@ fun StoryFeedCard(
                 )
 
                 Spacer(Modifier.weight(1f))
-                item.timeAgo?.let { Text(it, style = InkTheme.typography.bodySmall, color = InkTheme.colors.textFaint) }
+                Text(viewModel.formatTime(post.createdAt.toString()), style = InkTheme.typography.bodySmall, color = InkTheme.colors.textFaint)
 
             }
         }
@@ -166,33 +167,33 @@ fun StoryFeedCard(
     }
 }
 
-@Composable
-private fun GenrePill(genre: StoryGenreFeed) {
-    Box(
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(genre.color.copy(alpha = genre.bgAlpha))
-            .border(0.5.dp, genre.color.copy(alpha = 0.3f), CircleShape)
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-    ) {
-        Text(
-            text       = genre.label.uppercase(),
-            style = InkTheme.typography.labelSmall,
-            color      = genre.color
-        )
-    }
-}
+//@Composable
+//private fun GenrePill(genre: PostGenre) {
+//    Box(
+//        modifier = Modifier
+//            .clip(CircleShape)
+//            .background(genre.color.copy(alpha = genre.bgAlpha))
+//            .border(0.5.dp, genre.color.copy(alpha = 0.3f), CircleShape)
+//            .padding(horizontal = 10.dp, vertical = 4.dp),
+//    ) {
+//        Text(
+//            text = genre.label.uppercase(),
+//            style = InkTheme.typography.labelSmall,
+//            color = genre.color
+//        )
+//    }
+//}
 
-@Composable
-private fun MetaChip(icon: ImageVector, label: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Icon(icon, null, tint = InkTheme.colors.textFaint, modifier = Modifier.size(13.dp))
-        Text(label, style = InkTheme.typography.bodySmall, color = InkTheme.colors.textFaint)
-    }
-}
+//@Composable
+//private fun MetaChip(icon: ImageVector, label: String) {
+//    Row(
+//        verticalAlignment = Alignment.CenterVertically,
+//        horizontalArrangement = Arrangement.spacedBy(4.dp),
+//    ) {
+//        Icon(icon, null, tint = InkTheme.colors.textFaint, modifier = Modifier.size(13.dp))
+//        Text(label, style = InkTheme.typography.bodySmall, color = InkTheme.colors.textFaint)
+//    }
+//}
 
 @Composable
 private fun EngageChip(
@@ -228,15 +229,4 @@ private fun formatCount(n: Long): String = when {
     n >= 1_000_000 -> (n / 1_000_000.0).format(decimals = 1) + "M"
     n >= 1_000     -> (n / 1_000.0).format(decimals = 1) + "k"
     else           -> n.toString()
-}
-
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun StoryFeedPrev() {
-    StoryFeedCard(
-        item = storyFeed[0],
-        modifier = Modifier,
-        onCommentsClick = {},
-    )
 }
