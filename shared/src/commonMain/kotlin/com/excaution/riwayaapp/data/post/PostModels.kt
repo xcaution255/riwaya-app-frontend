@@ -11,6 +11,11 @@ enum class PostGenre {
 }
 
 @Serializable
+data class LikeResponse(val liked: Boolean, val likeCount: Long)
+
+@Serializable
+data class SaveResponse(val saved: Boolean, val saveCount: Long)
+@Serializable
 data class CreatePostRequest(
     val title: String,
     val content: String,
@@ -52,3 +57,5 @@ data class PageResponse<T>(
     val totalPages: Int,
     val hasNext: Boolean
 )
+
+

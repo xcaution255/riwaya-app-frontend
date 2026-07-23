@@ -12,7 +12,7 @@ class PostRepository(private val api: PostApi) {
 
     suspend fun getPost(postId: Uuid): ApiResult<PostResponse> = api.getPost(postId)
 
-    suspend fun getFeed(page: Int = 0, size: Int = 20): ApiResult<PageResponse<PostResponse>> = api.getFeed(page, size)
+    suspend fun getFeed(page: Int = 0, size: Int = 20, genre: PostGenre?): ApiResult<PageResponse<PostResponse>> = api.getFeed(page, size, genre)
 
     suspend fun getUserPosts(authorId: Uuid, page: Int = 0, size: Int = 20): ApiResult<PageResponse<PostResponse>> = api.getUserPosts(authorId, page, size)
 
@@ -26,5 +26,19 @@ class PostRepository(private val api: PostApi) {
 
     suspend fun deletePost(postId: Uuid): ApiResult<Map<String, String>> = api.deletePost(postId)
 
+
+    suspend fun likePost(postId: Uuid): ApiResult<PageResponse<LikeResponse>> = api.likePost(postId)
+
+    suspend fun savePost(postId: Uuid): ApiResult<PageResponse<SaveResponse>> = api.savePost(postId)
+
+
+    suspend fun searchPosts(
+        query: String,
+        genre: PostGenre? = null,
+        page: Int = 0,
+        size: Int = 20
+    ): ApiResult<PageResponse<PostResponse>> {
+        return api.searchPosts(query, genre, page, size)
+    }
 
 }

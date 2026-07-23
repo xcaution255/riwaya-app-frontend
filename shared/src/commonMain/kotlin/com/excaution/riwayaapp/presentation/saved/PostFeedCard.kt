@@ -1,13 +1,10 @@
-package com.excaution.riwayaapp.presentation.home
+package com.excaution.riwayaapp.presentation.saved
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -22,8 +19,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.excaution.riwayaapp.data.post.PostResponse
 import com.excaution.riwayaapp.format
+import com.excaution.riwayaapp.presentation.home.PostViewModel
 import com.excaution.riwayaapp.presentation.theme.InkTheme
-import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -34,13 +31,13 @@ fun PostFeedCard(
     modifier: Modifier = Modifier,
     onCommentsClick: (PostResponse) -> Unit = {}
 ) {
-    val viewModel : PostViewModel = koinViewModel()
+    val viewModel : PostSavedViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
     var isExpanded by remember { mutableStateOf(false) }
     var liked      by remember { mutableStateOf(post.likedByCurrentUser) }
     var saved      by remember { mutableStateOf(post.savedByCurrentUser) }
-    var likeCount  by remember { mutableLongStateOf(post.likeCount + if (post.likedByCurrentUser) 1 else 0) }
+    var likeCount  by remember { mutableLongStateOf(post.likeCount ) }
 
 
     Column(
@@ -139,8 +136,10 @@ fun PostFeedCard(
                     label = formatCount(likeCount),
                     tint = if (liked) Color(0xFFE24B4A) else InkTheme.colors.textMuted,
                     modifier = Modifier,
-                    onClick = {liked = !liked
-                        likeCount = post.likeCount + if (liked) 1 else 0}
+                    onClick = {
+                        viewModel.likePost(post.id)
+                        liked = !liked
+                        likeCount = post.likeCount}
                 )
                 EngageChip(
                     icon = Icons.Rounded.ChatBubbleOutline,
@@ -153,7 +152,9 @@ fun PostFeedCard(
                     label = if (saved) "Saved" else "Save",
                     tint = if (saved) InkTheme.colors.accentPrimary else InkTheme.colors.textMuted,
                     modifier = Modifier,
-                    onClick  = { saved = !saved },
+                    onClick  = {
+                        viewModel.savePost(post.id)
+                        saved = !saved },
                 )
 
                 Spacer(Modifier.weight(1f))

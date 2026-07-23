@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,8 +29,10 @@ import androidx.compose.ui.unit.sp
 import com.excaution.riwayaapp.presentation.theme.InkTheme
 
 @Composable
-fun SearchBar() {
-    var query by remember { mutableStateOf("") }
+fun SearchBar(
+    query: String,
+    onQueryChanged: (String) -> Unit
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -49,7 +52,7 @@ fun SearchBar() {
         Spacer(Modifier.width(10.dp))
         BasicTextField(
             value         = query,
-            onValueChange = { query = it },
+            onValueChange = { onQueryChanged(it)},
             textStyle = LocalTextStyle.current.copy(
                 color    = InkTheme.colors.textPrimary,
                 fontSize = 14.sp,
@@ -60,7 +63,8 @@ fun SearchBar() {
                 }
                 inner()
             },
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
         )
     }
 }

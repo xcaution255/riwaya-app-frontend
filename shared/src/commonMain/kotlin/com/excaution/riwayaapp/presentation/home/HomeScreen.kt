@@ -1,6 +1,5 @@
 package com.excaution.riwayaapp.presentation.home
 
-
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -57,6 +56,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.excaution.riwayaapp.data.post.PostGenre
 import com.excaution.riwayaapp.domain.model.StoryGenreFeed
 import com.excaution.riwayaapp.presentation.components.SurfaceIconButton
 import com.excaution.riwayaapp.presentation.theme.GradientAccent
@@ -64,16 +64,15 @@ import com.excaution.riwayaapp.presentation.theme.InkTheme
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
-
 @Suppress("FrequentlyChangingValue")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(onNotificationClick: () -> Unit) {
-    // 1. Setup the Scroll Behavior for the Top Bar (EnterAlways = hides on downscroll, shows on upscroll)
+    // 1. the Scroll Behavior for the Top Bar (EnterAlways = hides on downscroll, shows on upscroll)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val listState = rememberLazyListState()
-    var showSheet    by remember { mutableStateOf(false) }
-    val sheetState   = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
     val viewModel : PostViewModel = koinViewModel()
@@ -83,12 +82,22 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
     // 1. Calculate the active refreshing state on the fly based on current UI flags
     val isRefreshing = uiState is PostUiState.Loading && listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
 
-
-    LaunchedEffect(Unit) {
-        viewModel.loadNextPage()
-    }
     //for chips
     var selectedGenre by remember { mutableStateOf(StoryGenreFeed.ALL) }
+
+    // Trigger a backend data sweep whenever a user changes categories
+    LaunchedEffect(selectedGenre) {
+        // Map your UI chip states to your backend PostGenre Enum properties safely
+        val targetBackendGenre = when(selectedGenre) {
+            StoryGenreFeed.ALL -> null
+            StoryGenreFeed.STORIES -> PostGenre.STORIES // Map these to match backend schemas
+            StoryGenreFeed.ENTERTAINMENT -> PostGenre.ENTERTAINMENT
+            StoryGenreFeed.ARTICLES -> PostGenre.ARTICLES
+            StoryGenreFeed.SPORTS -> PostGenre.SPORTS
+            StoryGenreFeed.MOVIES -> PostGenre.MOVIES
+        }
+        viewModel.loadNextPage(genre = targetBackendGenre)
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection), // Crucial: Connects scroll to TopBar
@@ -96,8 +105,8 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
             TopAppBar(
                 title = {
                     Text(
-                        text       = "RiwayaApp",
-                        fontSize   = 24.sp,
+                        text = "RiwayaApp",
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = (-0.8).sp,
                         style = LocalTextStyle.current.copy(
@@ -135,15 +144,16 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
                     CircularProgressIndicator()
                 }
                 is PostUiState.FeedSuccess -> {
+                    val liveBackendPosts = state.pageData.content
                     // 1. Filter the live network data using the selected genre chip
-                    val liveFilteredPosts = remember(selectedGenre, state.pageData.content) {
-                        if (selectedGenre == StoryGenreFeed.ALL) {
-                            state.pageData.content
-                        } else {
-                            // Converts response genre to match your UI chip Enum if named exactly the same
-                            state.pageData.content.filter { it.genre.name == selectedGenre.name }
-                        }
-                    }
+//                    val liveFilteredPosts = remember(selectedGenre, state.pageData.content) {
+//                        if (selectedGenre == StoryGenreFeed.ALL) {
+//                            state.pageData.content
+//                        } else {
+//                            // Converts response genre to match your UI chip Enum if named exactly the same
+//                            state.pageData.content.filter { it.genre.name == selectedGenre.name }
+//                        }
+//                    }
                     // 2. Wrap your layout container here to monitor swipe refresh gestures
                     PullToRefreshBox(
                         isRefreshing = isRefreshing,
@@ -167,21 +177,22 @@ fun HomeScreen(onNotificationClick: () -> Unit) {
                         stickyHeader {
                             CategoryChips(
                                 selected = selectedGenre,
-                                onSelect = { selectedGenre = it })
+                                onSelect = { selectedGenre = it })  // Automatically triggers our LaunchedEffect above!
                         }
 
                         // 2. Loop through the real network data list instead of the mock list
                         itemsIndexed(
-                            items = liveFilteredPosts,
+                            items = liveBackendPosts, // Uses the fresh database feed array directly
                             key = { _, post -> post.id.toString() } // Safe multiplatform UUID string conversion
                         ) { index, postItem -> // 'postItem' represents a single PostResponse object
 
                             // 2. Pagination Trigger Hook: If the user scrolls 4 items away from the bottom, pre-fetch next page!
-                            if (index >= liveFilteredPosts.lastIndex - 4) {
+                            if (index >= liveBackendPosts.lastIndex - 4) {
+                                // Keep pulling subsequent pages for the currently active genre filter
                                 viewModel.loadNextPage()
                             }
                             PostFeedCard(
-                                post = postItem, //  FIXED: Pass the individual item, not the whole list!
+                                post = postItem,
                                 modifier = Modifier,
                                 onCommentsClick = { clickedPost ->
                                     // You can track which post comments to open here if needed

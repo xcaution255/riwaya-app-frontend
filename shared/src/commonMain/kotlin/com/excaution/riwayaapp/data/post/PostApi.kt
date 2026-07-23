@@ -20,8 +20,9 @@ class PostApi(private val client: HttpClient) {
         client.get("/posts/$postId").body()
     }
 
-    suspend fun getFeed(page: Int, size: Int): ApiResult<PageResponse<PostResponse>> = safeApiCall {
+    suspend fun getFeed(page: Int, size: Int, genre: PostGenre?): ApiResult<PageResponse<PostResponse>> = safeApiCall {
         client.get("/posts/feed") {
+            parameter("genre", genre?.name) // Nullable parameter safe-drop
             parameter("page", page)
             parameter("size", size)
         }.body()
@@ -32,6 +33,14 @@ class PostApi(private val client: HttpClient) {
             parameter("page", page)
             parameter("size", size)
         }.body()
+    }
+
+    suspend fun likePost(postId: Uuid): ApiResult<PageResponse<LikeResponse>> = safeApiCall {
+        client.post("/api/posts/$postId/like").body()
+    }
+
+    suspend fun savePost(postId: Uuid): ApiResult<PageResponse<SaveResponse>> = safeApiCall {
+        client.post("/api/posts/$postId/save").body()
     }
 
     suspend fun getSavedPosts(page: Int, size: Int): ApiResult<PageResponse<PostResponse>> = safeApiCall {
@@ -57,5 +66,21 @@ class PostApi(private val client: HttpClient) {
     suspend fun deletePost(postId: Uuid): ApiResult<Map<String, String>> = safeApiCall {
         client.delete("/posts/$postId").body()
     }
+
+    suspend fun searchPosts(
+        query: String,
+        genre: PostGenre?,
+        page: Int,
+        size: Int
+    ): ApiResult<PageResponse<PostResponse>> = safeApiCall {
+        client.get("/posts/search") {
+            parameter("q", query)
+            // If genre is null, Ktor safely drops the parameter from the URL string
+            parameter("genre", genre?.name)
+            parameter("page", page)
+            parameter("size", size)
+        }.body()
+    }
+
 }
 

@@ -1,12 +1,8 @@
 package com.excaution.riwayaapp.presentation.saved
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -14,10 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material3.Icon
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -26,9 +19,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -37,11 +28,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,35 +43,60 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.style.TextOverflow
-import com.excaution.riwayaapp.domain.model.SampleData
-import com.excaution.riwayaapp.domain.model.Story
+import com.excaution.riwayaapp.data.post.PostGenre
 import com.excaution.riwayaapp.domain.model.StoryGenreFeed
-import com.excaution.riwayaapp.presentation.components.GenreTag
-import com.excaution.riwayaapp.presentation.components.StatChip
+import com.excaution.riwayaapp.presentation.home.CommentsSheet
+import com.excaution.riwayaapp.presentation.home.PostUiState
+import com.excaution.riwayaapp.presentation.home.PostViewModel
+import com.excaution.riwayaapp.presentation.saved.PostSavedUiState
 import com.excaution.riwayaapp.presentation.theme.GradientAccent
 import com.excaution.riwayaapp.presentation.theme.InkTheme
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 
+@Suppress("FrequentlyChangingValue")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SavedScreen() {
-    // 1. Setup the Scroll Behavior for the Top Bar (EnterAlways = hides on downscroll, shows on upscroll)
+    // 1. the Scroll Behavior for the Top Bar (EnterAlways = hides on downscroll, shows on upscroll)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val listState = rememberLazyListState()
+    var showSheet    by remember { mutableStateOf(false) }
+    val sheetState   = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
 
+    val viewModel : PostSavedViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsState()
+    // 1. Collect the pagination state at the top of HomeScreen
+    val isPaginationLoading by viewModel.isPaginationLoading.collectAsState()
+    // 1. Calculate the active refreshing state on the fly based on current UI flags
+    val isRefreshing = uiState is PostSavedUiState.Loading && listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
     //for chips
     var selectedGenre by remember { mutableStateOf(StoryGenreFeed.ALL) }
-    val filteredStories = remember(selectedGenre) {
-        if (selectedGenre == StoryGenreFeed.ALL) SampleData.stories
-        else SampleData.stories.filter { it.genre == selectedGenre }
+    // Trigger a backend data sweep whenever a user changes categories
+    LaunchedEffect(selectedGenre) {
+        // Map your UI chip states to your backend PostGenre Enum properties safely
+        val targetBackendGenre = when(selectedGenre) {
+            StoryGenreFeed.ALL -> null
+            StoryGenreFeed.STORIES -> PostGenre.STORIES // Map these to match backend schemas
+            StoryGenreFeed.ENTERTAINMENT -> PostGenre.ENTERTAINMENT
+            StoryGenreFeed.ARTICLES -> PostGenre.ARTICLES
+            StoryGenreFeed.SPORTS -> PostGenre.SPORTS
+            StoryGenreFeed.MOVIES -> PostGenre.MOVIES
+        }
+        viewModel.loadNextPage(genre = targetBackendGenre)
     }
 
     Scaffold(
@@ -87,8 +105,8 @@ fun SavedScreen() {
             TopAppBar(
                 title = {
                     Text(
-                        text       = "Saved",
-                        fontSize   = 24.sp,
+                        text = "Saved",
+                        fontSize = 24.sp,
                         letterSpacing = (-0.8).sp,
                         style = LocalTextStyle.current.copy(
                             brush = Brush.linearGradient(GradientAccent),
@@ -105,43 +123,128 @@ fun SavedScreen() {
             )
         }
     ) { innerPadding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 0.dp),
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding(), // Handles top bar dynamically
-                bottom = innerPadding.calculateBottomPadding()
-            )
+                .background(InkTheme.colors.bgDeep),
+            contentAlignment = Alignment.Center
         ) {
-            // When the TopAppBar hides, this layer slides up and locks perfectly at the very top.
-            stickyHeader {
-                CategoryChips(selected = selectedGenre, onSelect = { selectedGenre = it })
-            }
-
-            itemsIndexed(
-                items = filteredStories.filter { !it.isFeatured },
-                key   = { _, s -> s.id },
-            ) { index, story ->
-                AnimatedStoryListItem(
-                    story   = story,
-                    index   = index,
-                    onClick = {},
-                )
-                if (index < filteredStories.size - 2) {
-                    HorizontalDivider(
-                        color     = InkTheme.colors.bgBorder.copy(alpha = 0.5f),
-                        thickness = 0.5.dp,
-                        modifier  = Modifier.padding(start = 90.dp, end = 20.dp),
-                    )
+            when(val state = uiState) {
+                is PostSavedUiState.Idle -> {}
+                // Show the full screen loader indicator ONLY on the absolute first page load
+                is PostSavedUiState.Loading -> {
+                    CircularProgressIndicator()
                 }
+                is PostSavedUiState.FeedSuccess -> {
+                    val liveBackendPosts = state.pageData.content
+                    // 2. Wrap your layout container here to monitor swipe refresh gestures
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh = {
+                            // Clears pagination counters and pulls a fresh page 0 branch
+                            viewModel.refreshFeed()
+                        }
+                    ){
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 0.dp),
+                            state = listState,
+                            contentPadding = PaddingValues(
+                                top = innerPadding.calculateTopPadding(), // Handles top bar dynamically
+                                bottom = innerPadding.calculateBottomPadding()
+                            )
+                        ) {
+                            // When the TopAppBar hides, this layer slides up and locks perfectly at the very top.
+                            // Sticky genre selector header
+                            stickyHeader {
+                                CategoryChips(
+                                    selected = selectedGenre,
+                                    onSelect = { selectedGenre = it })
+                            }
+
+                            // 2. Loop through the real network data list instead of the mock list
+                            itemsIndexed(
+                                items = liveBackendPosts,
+                                key = { _, post -> post.id.toString() } // Safe multiplatform UUID string conversion
+                            ) { index, postItem -> // 'postItem' represents a single PostResponse object
+
+                                // 2. Pagination Trigger Hook: If the user scrolls 4 items away from the bottom, pre-fetch next page!
+                                if (index >= liveBackendPosts.lastIndex - 4) {
+                                    viewModel.loadNextPage()
+                                }
+                                PostFeedCard(
+                                    post = postItem, //  FIXED: Pass the individual item, not the whole list!
+                                    modifier = Modifier,
+                                    onCommentsClick = { clickedPost ->
+                                        // You can track which post comments to open here if needed
+                                        showSheet = true
+                                        scope.launch { sheetState.show() }
+                                    }
+                                )
+                            }
+                            // 2. Append the bottom pagination indicator item conditionally
+                            if (isPaginationLoading) {
+                                item(key = "pagination-loader") {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 24.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(
+                                            color = InkTheme.colors.accentPrimary,
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                    }
+                                }
+                            } else {
+                                // Fallback standard spacing item when not loading data
+                                item(key = "bottom-spacer") {
+                                    Spacer(Modifier.height(40.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+                is PostSavedUiState.Error -> {
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = Color.Red,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else -> {}
             }
-            item(key = "bottom-spacer") { Spacer(Modifier.height(40.dp)) }
         }
     }
-}
+    if (showSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSheet = false },
+            sheetState       = sheetState,
+            containerColor   = InkTheme.colors.bgSurface,
+            dragHandle = {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 10.dp, bottom = 4.dp)
+                        .width(36.dp)
+                        .height(4.dp)
+                        .clip(CircleShape)
+                        .background(InkTheme.colors.bgBorder),
+                )
+            },
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        ) {
+            CommentsSheet(
+                totalComments = 5345,
+                onDismiss = {
+                    scope.launch { sheetState.hide() }
+                    showSheet = false
+                }
+            )
+        }
+    }
+        }
 
-// ── Category Chips ───────────────────────────────────────────────────────────
 
 @Composable
 fun CategoryChips( //private
@@ -164,9 +267,9 @@ fun CategoryChips( //private
     ) {
         items(genres) { genre ->
             CategoryChip(
-                label    = "${genreEmojis[genre]} ${genre.label}",
+                label = "${genreEmojis[genre]} ${genre.label}",
                 isActive = genre == selected,
-                onClick  = { onSelect(genre) },
+                onClick = { onSelect(genre) },
             )
         }
     }
@@ -181,7 +284,7 @@ fun CategoryChip( //private
     val scale by animateFloatAsState(
         targetValue   = if (isActive) 1f else 0.96f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "chipScale",
+        label         = "chipScale",
     )
     Box(
         contentAlignment = Alignment.Center,
@@ -193,7 +296,7 @@ fun CategoryChip( //private
                 else Modifier.background(InkTheme.colors.bgSurface)
                     .border(1.5.dp, InkTheme.colors.bgBorder, RoundedCornerShape(20.dp))
             )
-            .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null){onClick()}
+            .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null) {onClick()}
             .padding(horizontal = 16.dp, vertical = 9.dp),
     ) {
         Text(
@@ -201,107 +304,5 @@ fun CategoryChip( //private
             style = InkTheme.typography.bodyMedium,
             color      = if (isActive) Color.White else InkTheme.colors.textSecondary,
         )
-    }
-}
-
-
-// ── Story List Item ───────────────────────────────────────────────────────────
-@Composable
-fun AnimatedStoryListItem( //private
-    story: Story,
-    index: Int,
-    onClick: () -> Unit,
-) {
-    var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(story.id) {
-        delay(index * 60L)
-        visible = true
-    }
-    AnimatedVisibility(
-        visible = visible,
-        enter   = fadeIn(tween(300)) + slideInHorizontally(tween(300)) { -20 },
-    ) {
-        StoryListItem(story = story, onClick = onClick)
-    }
-}
-
-@Composable
-private fun StoryListItem(story: Story, onClick: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(interactionSource =  remember { MutableInteractionSource() }, indication = null){onClick()}
-            .padding(horizontal = 20.dp, vertical = 14.dp),
-    ) {
-        // Cover
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .width(58.dp)
-                .height(72.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Brush.linearGradient(story.coverGradient)),
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(8.dp)
-                    .fillMaxHeight()
-                    .align(Alignment.CenterStart)
-                    .background(story.coverGradient.first().copy(alpha = 0.6f))
-            )
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(story.coverGradient.first().copy(alpha = 0.8f))
-                    .border(1.dp, story.genre.color.copy(alpha = 0.5f), CircleShape),
-            ) {
-                Text(story.coverEmoji, style = InkTheme.typography.bodyLarge)
-            }
-        }
-
-        // Info
-        Column(modifier = Modifier.weight(1f)) {
-            GenreTag(label = story.genre.label, color = story.genre.color)
-            Spacer(Modifier.height(2.dp))
-            Text(
-                text = story.title,
-                style = InkTheme.typography.titleLarge,
-                color = InkTheme.colors.textPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text     = "by ${story.author}",
-                style = InkTheme.typography.bodySmall,
-                color    = InkTheme.colors.textMuted,
-            )
-            Spacer(Modifier.height(6.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                StatChip("♥", story.likes)
-                StatChip("💬", story.comments)
-                StatChip("⏱", "${story.readTimeMin} min")
-            }
-        }
-
-        // Chevron
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(32.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(InkTheme.colors.bgSurface)
-                .border(1.dp, InkTheme.colors.bgBorder, RoundedCornerShape(10.dp)),
-        ) {
-            Icon(
-                imageVector        = Icons.Rounded.ChevronRight,
-                contentDescription = "Open story",
-                tint               = InkTheme.colors.accentPrimary,
-                modifier           = Modifier.size(16.dp),
-            )
-        }
     }
 }
